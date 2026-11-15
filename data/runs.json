@@ -1,0 +1,1006 @@
+[
+ {
+  "businesses": [
+   {
+    "detail": "5.0 \u00b7 540+ Google reviews",
+    "id": "reyes",
+    "name": "Reyes Garage Door LLC",
+    "packUrl": "https://claude.ai/artifact/5TD6jqKGwstTUsjDKoYjsx",
+    "short": "Reyes"
+   },
+   {
+    "detail": "5.0 \u00b7 353 Google reviews",
+    "id": "mychoice",
+    "name": "My Choice Garage LLC",
+    "short": "My Choice"
+   },
+   {
+    "detail": "5.0 \u00b7 62 Thumbtack",
+    "id": "nabors",
+    "name": "Nabors Garage Doors",
+    "short": "Nabors"
+   },
+   {
+    "detail": "4.9 \u00b7 441 Thumbtack",
+    "id": "ms",
+    "name": "M&S Garage Door Services",
+    "short": "M&S"
+   },
+   {
+    "detail": "5.0 \u00b7 280+ Yelp",
+    "id": "g911",
+    "name": "911 Garage Pros",
+    "short": "911 Garage"
+   },
+   {
+    "detail": "5.0 \u00b7 22 Yelp",
+    "id": "core",
+    "name": "Core Garage Door Repair",
+    "short": "Core"
+   },
+   {
+    "detail": "5.0 \u00b7 82 Thumbtack",
+    "id": "steward",
+    "name": "Steward Garage Door Service",
+    "short": "Steward"
+   },
+   {
+    "detail": "4.7 \u00b7 122 Thumbtack",
+    "id": "veteran",
+    "name": "Veteran Garage Door Repair",
+    "short": "Veteran"
+   }
+  ],
+  "city": "Dallas\u2013Fort Worth",
+  "log": [
+   {
+    "m": "Searching garage door repair in Dallas\u2013Fort Worth",
+    "s": "scout",
+    "t": "2026-11-13T14:03:10Z"
+   },
+   {
+    "b": "reyes",
+    "m": "Found: 540+ five-star reviews, only a free Google profile",
+    "s": "scout",
+    "st": "working",
+    "t": "2026-11-13T14:04:00Z"
+   },
+   {
+    "b": "g911",
+    "m": "Found: 280+ Yelp reviews",
+    "s": "scout",
+    "st": "working",
+    "t": "2026-11-13T14:04:20Z"
+   },
+   {
+    "b": "mychoice",
+    "m": "Found: 353 Google reviews",
+    "s": "scout",
+    "st": "working",
+    "t": "2026-11-13T14:04:40Z"
+   },
+   {
+    "b": "ms",
+    "m": "Found: hired 978 times on Thumbtack",
+    "s": "scout",
+    "st": "working",
+    "t": "2026-11-13T14:05:00Z"
+   },
+   {
+    "b": "nabors",
+    "m": "Found: two-person shop in Carrollton",
+    "s": "scout",
+    "st": "working",
+    "t": "2026-11-13T14:05:20Z"
+   },
+   {
+    "b": "g911",
+    "m": "Skipped: already has blog and city pages",
+    "s": "scout",
+    "st": "skipped",
+    "t": "2026-11-13T14:05:40Z"
+   },
+   {
+    "b": "nabors",
+    "m": "Skipped: part of a multi-location brand",
+    "s": "scout",
+    "st": "skipped",
+    "t": "2026-11-13T14:06:30Z"
+   },
+   {
+    "b": "ms",
+    "m": "Skipped: has an SEO site with city pages",
+    "s": "scout",
+    "st": "skipped",
+    "t": "2026-11-13T14:06:50Z"
+   },
+   {
+    "b": "steward",
+    "m": "Skipped: has an SEO site with city pages",
+    "s": "scout",
+    "st": "skipped",
+    "t": "2026-11-13T14:07:10Z"
+   },
+   {
+    "b": "veteran",
+    "m": "Skipped: multi-location brand",
+    "s": "scout",
+    "st": "skipped",
+    "t": "2026-11-13T14:07:20Z"
+   },
+   {
+    "b": "core",
+    "m": "Skipped: has an SEO site",
+    "s": "scout",
+    "st": "skipped",
+    "t": "2026-11-13T14:07:30Z"
+   },
+   {
+    "b": "reyes",
+    "m": "Checking Watauga searches: only the Google profile shows",
+    "s": "auditor",
+    "st": "working",
+    "t": "2026-11-13T14:07:50Z"
+   },
+   {
+    "b": "mychoice",
+    "m": "Own business name search: site not in results",
+    "s": "auditor",
+    "st": "working",
+    "t": "2026-11-13T14:08:10Z"
+   },
+   {
+    "b": "reyes",
+    "m": "Building homepage mockup",
+    "s": "builder",
+    "st": "working",
+    "t": "2026-11-13T14:09:00Z"
+   },
+   {
+    "b": "mychoice",
+    "m": "Building homepage mockup",
+    "s": "builder",
+    "st": "working",
+    "t": "2026-11-13T14:09:10Z"
+   },
+   {
+    "b": "reyes",
+    "m": "Writing Google post, social post and spring-safety article",
+    "s": "writer",
+    "st": "working",
+    "t": "2026-11-13T14:10:00Z"
+   },
+   {
+    "b": "mychoice",
+    "m": "Writing Google post, social post and repair-or-replace guide",
+    "s": "writer",
+    "st": "working",
+    "t": "2026-11-13T14:10:10Z"
+   },
+   {
+    "b": "reyes",
+    "m": "Drafting email, text and day-3 follow-up",
+    "s": "outreach",
+    "st": "working",
+    "t": "2026-11-13T14:11:30Z"
+   },
+   {
+    "b": "mychoice",
+    "m": "Drafting email, text and day-3 follow-up",
+    "s": "outreach",
+    "st": "working",
+    "t": "2026-11-13T14:11:40Z"
+   },
+   {
+    "b": "reyes",
+    "m": "Pack v1 ready for your review",
+    "s": "approval",
+    "st": "waiting",
+    "t": "2026-11-13T14:13:00Z"
+   },
+   {
+    "b": "mychoice",
+    "m": "Pack v1 ready for your review",
+    "s": "approval",
+    "st": "waiting",
+    "t": "2026-11-13T14:13:00Z"
+   }
+  ],
+  "niche": "Garage door repair",
+  "note": "Pilot run, replayed from today's work (times approximate)",
+  "startedAt": "2026-11-13T14:03:00Z",
+  "status": "done",
+  "title": "Garage door repair",
+  "id": "2026-11-13-garage-pilot"
+ },
+ {
+  "businesses": [
+   {
+    "detail": "5.0\u2605 \u00b7 151 Google reviews \u00b7 thin site",
+    "id": "steammaster",
+    "name": "Steam Master Cleaning",
+    "packUrl": "https://israelhockey.github.io/24hourwebsite/p/steam-master-cleaning-r8urs/",
+    "short": "Steam Master"
+   },
+   {
+    "detail": "Since 2005 \u00b7 4.9\u2605 \u00b7 60 reviews",
+    "id": "fivestar",
+    "name": "Five Star Carpets & Upholstery Care",
+    "packUrl": "https://israelhockey.github.io/24hourwebsite/p/five-star-carpets-higwv/",
+    "short": "Five Star"
+   },
+   {
+    "detail": "5.0\u2605 \u00b7 22 reviews \u00b7 old web address for sale",
+    "id": "sunset",
+    "name": "Sunset Carpet Cleaning",
+    "packUrl": "https://israelhockey.github.io/24hourwebsite/p/sunset-carpet-cleaning-157we/",
+    "short": "Sunset"
+   }
+  ],
+  "city": "Mesa, AZ",
+  "log": [
+   {
+    "m": "Searching Google Maps for carpet cleaners in Mesa, AZ",
+    "s": "scout",
+    "st": "working",
+    "t": "2026-11-13T21:46:05Z"
+   },
+   {
+    "m": "Found 20 carpet cleaners on Google Maps around Mesa",
+    "s": "scout",
+    "st": "done",
+    "t": "2026-11-13T21:51:40Z"
+   },
+   {
+    "b": "steammaster",
+    "m": "Qualified: 151 five-star reviews, 372-word site with an empty headline",
+    "s": "scout",
+    "st": "done",
+    "t": "2026-11-13T21:51:41Z"
+   },
+   {
+    "b": "fivestar",
+    "m": "Qualified: 20 years in Mesa, homepage has no headline and 3 images",
+    "s": "scout",
+    "st": "done",
+    "t": "2026-11-13T21:51:41Z"
+   },
+   {
+    "b": "sunset",
+    "m": "Qualified: 5.0\u2605 on Google, no website",
+    "s": "scout",
+    "st": "done",
+    "t": "2026-11-13T21:51:41Z"
+   },
+   {
+    "b": "steammaster",
+    "m": "Running the free SEO audit",
+    "s": "auditor",
+    "st": "working",
+    "t": "2026-11-13T21:51:41Z"
+   },
+   {
+    "b": "steammaster",
+    "m": "Free audit: mobile speed 99, but every page is missing a Google description and the homepage headline never says Mesa or carpet",
+    "s": "auditor",
+    "st": "done",
+    "t": "2026-11-13T22:16:22Z"
+   },
+   {
+    "b": "fivestar",
+    "m": "Free audit: 3 different phone numbers, placeholder images live on the site, no homepage headline, #2 on Maps for upholstery",
+    "s": "auditor",
+    "st": "done",
+    "t": "2026-11-13T22:16:22Z"
+   },
+   {
+    "b": "sunset",
+    "m": "Free audit: no website, #19 on Maps, 5.0 on Google, Yelp and Facebook",
+    "s": "auditor",
+    "st": "done",
+    "t": "2026-11-13T22:16:22Z"
+   },
+   {
+    "m": "Collecting real photos for all three mockups",
+    "s": "builder",
+    "st": "working",
+    "t": "2026-11-13T22:16:22Z"
+   },
+   {
+    "m": "Homepage previews built for all three (photos to slot in when the computer reconnects)",
+    "s": "builder",
+    "st": "done",
+    "t": "2026-11-13T22:31:37Z"
+   },
+   {
+    "b": "steammaster",
+    "m": "Makeover plan published",
+    "s": "writer",
+    "st": "done",
+    "t": "2026-11-13T22:31:37Z"
+   },
+   {
+    "b": "fivestar",
+    "m": "Since-2005 plan published",
+    "s": "writer",
+    "st": "done",
+    "t": "2026-11-13T22:31:37Z"
+   },
+   {
+    "b": "sunset",
+    "m": "Launch kit published",
+    "s": "writer",
+    "st": "done",
+    "t": "2026-11-13T22:31:37Z"
+   },
+   {
+    "m": "3 outreach drafts waiting for your approval",
+    "s": "outreach",
+    "st": "done",
+    "t": "2026-11-13T22:31:37Z"
+   },
+   {
+    "b": "steammaster",
+    "m": "Pack ready for your review",
+    "s": "approval",
+    "st": "waiting",
+    "t": "2026-11-13T22:32:00Z"
+   },
+   {
+    "b": "fivestar",
+    "m": "Pack ready for your review",
+    "s": "approval",
+    "st": "waiting",
+    "t": "2026-11-13T22:32:00Z"
+   },
+   {
+    "b": "sunset",
+    "m": "Pack ready for your review",
+    "s": "approval",
+    "st": "waiting",
+    "t": "2026-11-13T22:32:00Z"
+   },
+   {
+    "b": "sunset",
+    "m": "Found it: sunsetcarpetcleaning.com now opens a GoDaddy for-sale page",
+    "s": "auditor",
+    "st": "done",
+    "t": "2026-11-13T22:58:00Z"
+   }
+  ],
+  "niche": "Carpet cleaning",
+  "note": "Free SEO audit \u00b7 real photos \u00b7 angle-based packs",
+  "startedAt": "2026-11-13T21:46:05Z",
+  "status": "done",
+  "title": "Carpet cleaning",
+  "id": "2026-11-13-mesa-carpet"
+ },
+ {
+  "businesses": [
+   {
+    "detail": "5.0\u2605 \u00b7 544 Google reviews (213 Thumbtack) \u00b7 since 1972",
+    "id": "jts",
+    "name": "JTS Overhead Doors",
+    "packUrl": "https://israelhockey.github.io/24hourwebsite/p/jts-garage-doors-6mrw6/",
+    "short": "JTS"
+   },
+   {
+    "detail": "4.9\u2605 \u00b7 235 Google reviews \u00b7 women-owned",
+    "id": "quality",
+    "name": "Quality Overhead Door Inc.",
+    "packUrl": "https://israelhockey.github.io/24hourwebsite/p/quality-overhead-door-06mta/",
+    "short": "Quality OHD"
+   },
+   {
+    "detail": "5.0 \u00b7 98 Thumbtack \u00b7 25 years",
+    "id": "goody",
+    "name": "Goody Garage Doors",
+    "short": "Goody"
+   },
+   {
+    "detail": "5.0 \u00b7 108 Thumbtack",
+    "id": "gogo",
+    "name": "GoGo Garage Door Service",
+    "short": "GoGo"
+   },
+   {
+    "detail": "5.0\u2605 \u00b7 70 Thumbtack reviews (was 15 in an old listing)",
+    "id": "kcduran",
+    "name": "KC Duran Garage Doors",
+    "packUrl": "https://israelhockey.github.io/24hourwebsite/p/kc-duran-garage-doors-gp79i/",
+    "short": "KC Duran"
+   },
+   {
+    "detail": "4.9 \u00b7 940 Google",
+    "id": "stapley",
+    "name": "Stapley Action Garage Door",
+    "short": "Stapley"
+   }
+  ],
+  "city": "Mesa, AZ",
+  "log": [
+   {
+    "m": "Searching garage door repair in Mesa, AZ",
+    "s": "scout",
+    "t": "2026-11-13T15:03:38Z"
+   },
+   {
+    "b": "jts",
+    "m": "Found: family business since 1972, 213 reviews, no website found yet",
+    "s": "scout",
+    "st": "working",
+    "t": "2026-11-13T15:04:22Z"
+   },
+   {
+    "b": "quality",
+    "m": "Found: Squarespace site with empty reviews section and two phone numbers",
+    "s": "scout",
+    "st": "working",
+    "t": "2026-11-13T15:04:22Z"
+   },
+   {
+    "b": "goody",
+    "m": "Found: 25 years, renamed from Arizona's Best Garage Door",
+    "s": "scout",
+    "st": "working",
+    "t": "2026-11-13T15:04:22Z"
+   },
+   {
+    "b": "gogo",
+    "m": "Found: 108 Thumbtack reviews, Apache Junction",
+    "s": "scout",
+    "st": "working",
+    "t": "2026-11-13T15:04:22Z"
+   },
+   {
+    "b": "kcduran",
+    "m": "Found: 1 year in business, 15 reviews",
+    "s": "scout",
+    "st": "working",
+    "t": "2026-11-13T15:04:22Z"
+   },
+   {
+    "b": "stapley",
+    "m": "Skipped: 940 Google reviews and its own site; a competitor, not a prospect",
+    "s": "scout",
+    "st": "skipped",
+    "t": "2026-11-13T15:04:22Z"
+   },
+   {
+    "b": "kcduran",
+    "m": "Skipped for now: too new to invest; revisit in 6 months",
+    "s": "scout",
+    "st": "skipped",
+    "t": "2026-11-13T15:04:22Z"
+   },
+   {
+    "b": "gogo",
+    "m": "Skipped for now: 2 years old and outside Mesa; Goody is the stronger fit",
+    "s": "scout",
+    "st": "skipped",
+    "t": "2026-11-13T15:04:22Z"
+   },
+   {
+    "b": "goody",
+    "m": "Skipped: two active SEO sites (goodygaragedoors.com and the old domain)",
+    "s": "scout",
+    "st": "skipped",
+    "t": "2026-11-13T15:05:07Z"
+   },
+   {
+    "b": "gogo",
+    "m": "Skipped: has an SEO site (gogogarageservice.com)",
+    "s": "scout",
+    "st": "skipped",
+    "t": "2026-11-13T15:05:07Z"
+   },
+   {
+    "b": "kcduran",
+    "m": "Re-qualified: no website at all, perfect fit for the $250 launch",
+    "s": "scout",
+    "st": "working",
+    "t": "2026-11-13T15:05:07Z"
+   },
+   {
+    "b": "quality",
+    "m": "Auditing current site: empty reviews, 2 phone numbers, leftover template text",
+    "s": "auditor",
+    "st": "working",
+    "t": "2026-11-13T15:05:07Z"
+   },
+   {
+    "b": "jts",
+    "m": "Auditing site: Gilbert headline, menu repeated 5x, $10% OFF typo, no 1972 story",
+    "s": "auditor",
+    "st": "working",
+    "t": "2026-11-13T15:05:07Z"
+   },
+   {
+    "b": "kcduran",
+    "m": "Checking competitors around Mesa",
+    "s": "auditor",
+    "st": "working",
+    "t": "2026-11-13T15:05:08Z"
+   },
+   {
+    "b": "quality",
+    "m": "Found 6 site issues; 4.8\u2605 with 190+ Google reviews not shown on site",
+    "s": "auditor",
+    "st": "done",
+    "t": "2026-11-13T15:09:12Z"
+   },
+   {
+    "b": "jts",
+    "m": "1972 story missing; Gilbert vs Mesa headline; duplicates and typo",
+    "s": "auditor",
+    "st": "done",
+    "t": "2026-11-13T15:09:12Z"
+   },
+   {
+    "b": "kcduran",
+    "m": "Competitors: A1 1,374 reviews, Stapley 940, Team 225",
+    "s": "auditor",
+    "st": "done",
+    "t": "2026-11-13T15:09:12Z"
+   },
+   {
+    "b": "quality",
+    "m": "Rendering 3D hero and designing the makeover homepage",
+    "s": "builder",
+    "st": "working",
+    "t": "2026-11-13T15:09:12Z"
+   },
+   {
+    "b": "jts",
+    "m": "Rendering golden-hour 3D hero and heritage homepage",
+    "s": "builder",
+    "st": "working",
+    "t": "2026-11-13T15:09:12Z"
+   },
+   {
+    "b": "kcduran",
+    "m": "Rendering dusk 3D hero and launch homepage",
+    "s": "builder",
+    "st": "working",
+    "t": "2026-11-13T15:09:12Z"
+   },
+   {
+    "b": "quality",
+    "m": "Makeover homepage + before/after slider",
+    "s": "builder",
+    "st": "done",
+    "t": "2026-11-13T15:15:09Z"
+   },
+   {
+    "b": "jts",
+    "m": "Heritage homepage with 1972 timeline",
+    "s": "builder",
+    "st": "done",
+    "t": "2026-11-13T15:15:09Z"
+   },
+   {
+    "b": "kcduran",
+    "m": "Launch homepage + brand starter",
+    "s": "builder",
+    "st": "done",
+    "t": "2026-11-13T15:15:09Z"
+   },
+   {
+    "b": "quality",
+    "m": "2 reels, 3 graphics, posts, review replies",
+    "s": "writer",
+    "st": "done",
+    "t": "2026-11-13T15:15:09Z"
+   },
+   {
+    "b": "jts",
+    "m": "2 reels, 3 graphics, posts, review replies",
+    "s": "writer",
+    "st": "done",
+    "t": "2026-11-13T15:15:09Z"
+   },
+   {
+    "b": "kcduran",
+    "m": "2 reels, 3 graphics, posts, review replies",
+    "s": "writer",
+    "st": "done",
+    "t": "2026-11-13T15:15:09Z"
+   },
+   {
+    "b": "quality",
+    "m": "Email and voicemail ready (contact form or call)",
+    "s": "outreach",
+    "st": "done",
+    "t": "2026-11-13T15:16:22Z"
+   },
+   {
+    "b": "jts",
+    "m": "Email ready (address listed on their site)",
+    "s": "outreach",
+    "st": "done",
+    "t": "2026-11-13T15:16:22Z"
+   },
+   {
+    "b": "kcduran",
+    "m": "Email and Instagram DM ready",
+    "s": "outreach",
+    "st": "done",
+    "t": "2026-11-13T15:16:22Z"
+   },
+   {
+    "b": "quality",
+    "m": "Makeover pack ready for your review",
+    "s": "approval",
+    "st": "waiting",
+    "t": "2026-11-13T15:16:22Z"
+   },
+   {
+    "b": "jts",
+    "m": "Heritage pack ready for your review",
+    "s": "approval",
+    "st": "waiting",
+    "t": "2026-11-13T15:16:22Z"
+   },
+   {
+    "b": "kcduran",
+    "m": "Launch kit ready for your review",
+    "s": "approval",
+    "st": "waiting",
+    "t": "2026-11-13T15:16:22Z"
+   }
+  ],
+  "niche": "Garage door repair",
+  "note": "Angle-based packs with custom hero imagery",
+  "startedAt": "2026-11-13T15:03:38Z",
+  "status": "done",
+  "title": "Garage door repair (v3, replaced by Mesa redo v4)",
+  "id": "2026-11-13-mesa-garage"
+ },
+ {
+  "businesses": [
+   {
+    "detail": "4.9\u2605 \u00b7 235 Google reviews \u00b7 women-owned",
+    "id": "quality",
+    "name": "Quality Overhead Door",
+    "packUrl": "https://israelhockey.github.io/24hourwebsite/p/quality-overhead-door-06mta/",
+    "short": "Quality"
+   },
+   {
+    "detail": "5.0\u2605 \u00b7 544 Google reviews \u00b7 since 1972",
+    "id": "jts",
+    "name": "JT's Overhead Doors",
+    "packUrl": "https://israelhockey.github.io/24hourwebsite/p/jts-garage-doors-6mrw6/",
+    "short": "JT's"
+   },
+   {
+    "detail": "5.0\u2605 \u00b7 70 Thumbtack reviews \u00b7 no Google profile",
+    "id": "kcduran",
+    "name": "KC Duran Garage Doors",
+    "packUrl": "https://israelhockey.github.io/24hourwebsite/p/kc-duran-garage-doors-gp79i/",
+    "short": "KC Duran"
+   }
+  ],
+  "city": "Mesa, AZ",
+  "decisions": {},
+  "log": [
+   {
+    "b": "quality",
+    "m": "Re-checked: 4.9\u2605 from 235 Google reviews, 44 photos, serving the Valley since 1996",
+    "s": "scout",
+    "st": "done",
+    "t": "2026-11-13T07:26:00-08:00"
+   },
+   {
+    "b": "jts",
+    "m": "Re-checked: 5.0\u2605 from 544 Google reviews, 308 photos, open 24/7",
+    "s": "scout",
+    "st": "done",
+    "t": "2026-11-13T07:26:00-08:00"
+   },
+   {
+    "b": "kcduran",
+    "m": "Re-checked: 70 Thumbtack reviews, hired 132 times; no Google profile found",
+    "s": "scout",
+    "st": "done",
+    "t": "2026-11-13T07:27:00-08:00"
+   },
+   {
+    "b": "quality",
+    "m": "Google Maps grid across Mesa: ranks at 2 of 9 points (#7, #14)",
+    "s": "auditor",
+    "st": "working",
+    "t": "2026-11-13T07:28:00-08:00"
+   },
+   {
+    "b": "quality",
+    "m": "Speed test: 26/100 on mobile, 31.5 s to load. Ranks for 371 searches, none for Mesa repair",
+    "s": "auditor",
+    "st": "done",
+    "t": "2026-11-13T07:30:00-08:00"
+   },
+   {
+    "b": "jts",
+    "m": "Not in Mesa or Gilbert top 10. Site technically clean; ~6 s on phones; 170 ranked searches",
+    "s": "auditor",
+    "st": "done",
+    "t": "2026-11-13T07:31:00-08:00"
+   },
+   {
+    "b": "kcduran",
+    "m": "Truck says kcdgaragedoors.com; it shows \u201ccoming soon\u201d. Not on Google Maps",
+    "s": "auditor",
+    "st": "done",
+    "t": "2026-11-13T07:32:00-08:00"
+   },
+   {
+    "b": "quality",
+    "m": "Pulled their family, team, truck and door photos from qualityovhd.com",
+    "s": "builder",
+    "st": "working",
+    "t": "2026-11-13T07:36:00-08:00"
+   },
+   {
+    "b": "jts",
+    "m": "Pulled their logo and project photos from jtsoverheaddoor.com",
+    "s": "builder",
+    "st": "working",
+    "t": "2026-11-13T07:40:00-08:00"
+   },
+   {
+    "b": "kcduran",
+    "m": "Pulled Kyler\u2019s truck photo and gate before-and-afters from Thumbtack",
+    "s": "builder",
+    "st": "working",
+    "t": "2026-11-13T07:44:00-08:00"
+   },
+   {
+    "b": "quality",
+    "m": "Homepage rebuilt around the family photo and the 235 reviews",
+    "s": "builder",
+    "st": "done",
+    "t": "2026-11-13T07:50:00-08:00"
+   },
+   {
+    "b": "jts",
+    "m": "Homepage rebuilt with the real logo, project gallery and 1972 timeline",
+    "s": "builder",
+    "st": "done",
+    "t": "2026-11-13T07:50:00-08:00"
+   },
+   {
+    "b": "kcduran",
+    "m": "Homepage rebuilt in their flag shield colors with before-and-afters",
+    "s": "builder",
+    "st": "done",
+    "t": "2026-11-13T07:50:00-08:00"
+   },
+   {
+    "b": "quality",
+    "m": "Reels and posts with their own photos; SEO section with live data",
+    "s": "writer",
+    "st": "done",
+    "t": "2026-11-13T07:58:00-08:00"
+   },
+   {
+    "b": "jts",
+    "m": "Reels and posts; SEO section; Thumbtack cost calculator",
+    "s": "writer",
+    "st": "done",
+    "t": "2026-11-13T07:58:00-08:00"
+   },
+   {
+    "b": "kcduran",
+    "m": "Reels with a before-and-after wipe; SEO section; Thumbtack cost calculator",
+    "s": "writer",
+    "st": "done",
+    "t": "2026-11-13T07:58:00-08:00"
+   },
+   {
+    "b": "quality",
+    "m": "Email: \u201cYour homepage takes 31 seconds to load on a phone\u201d",
+    "s": "outreach",
+    "st": "done",
+    "t": "2026-11-13T08:08:00-08:00"
+   },
+   {
+    "b": "jts",
+    "m": "Email: \u201c544 five-star reviews, and Google can\u2019t tell which city you\u2019re in\u201d",
+    "s": "outreach",
+    "st": "done",
+    "t": "2026-11-13T08:08:00-08:00"
+   },
+   {
+    "b": "kcduran",
+    "m": "Email: \u201cYour truck sends people to a coming soon page\u201d",
+    "s": "outreach",
+    "st": "done",
+    "t": "2026-11-13T08:08:00-08:00"
+   },
+   {
+    "b": "quality",
+    "m": "Pack v4 ready for your review",
+    "s": "approval",
+    "st": "waiting",
+    "t": "2026-11-13T08:09:00-08:00"
+   },
+   {
+    "b": "jts",
+    "m": "Pack v4 ready for your review",
+    "s": "approval",
+    "st": "waiting",
+    "t": "2026-11-13T08:09:00-08:00"
+   },
+   {
+    "b": "kcduran",
+    "m": "Pack v4 ready for your review",
+    "s": "approval",
+    "st": "waiting",
+    "t": "2026-11-13T08:09:00-08:00"
+   }
+  ],
+  "niche": "Garage door repair",
+  "note": "Real photos, live SEO data, Thumbtack calculator",
+  "startedAt": "2026-11-13T07:24:00-08:00",
+  "status": "done",
+  "title": "Mesa redo (v4)",
+  "id": "2026-11-13-mesa-redo"
+ },
+ {
+  "businesses": [
+   {
+    "detail": "5.0 \u00b7 540+ Google reviews",
+    "id": "reyes",
+    "name": "Reyes Garage Door LLC",
+    "packUrl": "https://claude.ai/artifact/23gzXjSgeq1BqHdBKZKx2D",
+    "short": "Reyes"
+   },
+   {
+    "detail": "5.0 \u00b7 353 Google reviews",
+    "id": "mychoice",
+    "name": "My Choice Garage LLC",
+    "packUrl": "https://claude.ai/artifact/Lqqiw2mux4er3aME7R6Mkq",
+    "short": "My Choice"
+   }
+  ],
+  "city": "Dallas\u2013Fort Worth",
+  "log": [
+   {
+    "m": "Starting pack upgrade for the two qualified prospects",
+    "s": "scout",
+    "t": "2026-11-13T14:32:06Z"
+   },
+   {
+    "b": "reyes",
+    "m": "Researching closest competitors in Watauga and NE Tarrant",
+    "s": "auditor",
+    "st": "working",
+    "t": "2026-11-13T14:32:06Z"
+   },
+   {
+    "b": "mychoice",
+    "m": "Queued: competitors in East Dallas",
+    "s": "auditor",
+    "st": "working",
+    "t": "2026-11-13T14:32:06Z"
+   },
+   {
+    "b": "reyes",
+    "m": "4 competitors: Precision 4.7\u00b71,205, Tarrant County Door & Gate 4.9\u00b7121, American Eagle 4.9\u00b734, a Watauga keyword site with 0 reviews",
+    "s": "auditor",
+    "st": "done",
+    "t": "2026-11-13T14:33:54Z"
+   },
+   {
+    "b": "mychoice",
+    "m": "3 competitors: Precision Garland 4.8\u00b7832, Hollywood Overhead 4.2\u00b710 (Yelp lists closed), TrueSafe 5.0\u00b732",
+    "s": "auditor",
+    "st": "done",
+    "t": "2026-11-13T14:33:54Z"
+   },
+   {
+    "b": "reyes",
+    "m": "Designing branded report and premium homepage",
+    "s": "builder",
+    "st": "working",
+    "t": "2026-11-13T14:33:54Z"
+   },
+   {
+    "b": "mychoice",
+    "m": "Designing branded report and premium homepage",
+    "s": "builder",
+    "st": "working",
+    "t": "2026-11-13T14:33:54Z"
+   },
+   {
+    "b": "reyes",
+    "m": "Premium homepage built: desktop and phone",
+    "s": "builder",
+    "st": "done",
+    "t": "2026-11-13T14:40:09Z"
+   },
+   {
+    "b": "mychoice",
+    "m": "Premium homepage built: desktop and phone",
+    "s": "builder",
+    "st": "done",
+    "t": "2026-11-13T14:40:09Z"
+   },
+   {
+    "b": "reyes",
+    "m": "Rendering 2 motion reels and 3 social graphics",
+    "s": "writer",
+    "st": "working",
+    "t": "2026-11-13T14:40:09Z"
+   },
+   {
+    "b": "mychoice",
+    "m": "Queued: 2 motion reels and 3 social graphics",
+    "s": "writer",
+    "st": "working",
+    "t": "2026-11-13T14:40:09Z"
+   },
+   {
+    "b": "reyes",
+    "m": "2 reels, 3 social graphics, 3 posts and review replies done",
+    "s": "writer",
+    "st": "done",
+    "t": "2026-11-13T14:43:37Z"
+   },
+   {
+    "b": "mychoice",
+    "m": "2 reels, 3 social graphics, 3 posts and review replies done",
+    "s": "writer",
+    "st": "done",
+    "t": "2026-11-13T14:43:37Z"
+   },
+   {
+    "b": "reyes",
+    "m": "Updating email to lead with the competitor finding",
+    "s": "outreach",
+    "st": "working",
+    "t": "2026-11-13T14:43:37Z"
+   },
+   {
+    "b": "mychoice",
+    "m": "Updating email to lead with the Thumbtack finding",
+    "s": "outreach",
+    "st": "working",
+    "t": "2026-11-13T14:43:37Z"
+   },
+   {
+    "b": "reyes",
+    "m": "Email, voicemail script and day-3 follow-up ready",
+    "s": "outreach",
+    "st": "done",
+    "t": "2026-11-13T14:43:58Z"
+   },
+   {
+    "b": "mychoice",
+    "m": "Email, voicemail script and day-3 follow-up ready",
+    "s": "outreach",
+    "st": "done",
+    "t": "2026-11-13T14:43:58Z"
+   },
+   {
+    "b": "reyes",
+    "m": "Pack v2 ready: branded report, competitors, reels",
+    "s": "approval",
+    "st": "waiting",
+    "t": "2026-11-13T14:43:58Z"
+   },
+   {
+    "b": "mychoice",
+    "m": "Pack v2 ready: branded report, competitors, reels",
+    "s": "approval",
+    "st": "waiting",
+    "t": "2026-11-13T14:43:58Z"
+   }
+  ],
+  "niche": "Garage door repair",
+  "note": "Branded reports, competitors, premium mockups and motion content",
+  "startedAt": "2026-11-13T14:32:06Z",
+  "status": "done",
+  "title": "Pack upgrade v2",
+  "id": "2026-11-13-pack-upgrade"
+ }
+]
