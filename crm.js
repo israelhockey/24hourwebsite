@@ -67,8 +67,9 @@
 <button class="crm-btn" id="crmSign" type="button">🔑 <span class="t">Sign in</span></button>`;
   const pill = bar.querySelector('.pillbar'); pill ? pill.after(box) : bar.prepend(box);
   const $ = id => document.getElementById(id);
-  let session = null, isAdmin = false, data = { companies: [], events: [], outreach: [], requests: [] }, open = null, filt = 'active', expanded = null;
+  let session = null, isAdmin = false, me = { name: '' }, data = { companies: [], events: [], outreach: [], requests: [] }, open = null, filt = 'active', expanded = null;
 
+  const fill = t => String(t || '').split('{sender}').join(me.name || 'Tom');
   function toast(t) { const d = document.createElement('div'); d.className = 'crm-toast'; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 2600) }
 
   // ---------------------------------------------------------------- panel shell
@@ -105,8 +106,8 @@
   async function refreshAuth() {
     const { data: s } = await sb.auth.getSession(); session = s.session;
     isAdmin = false;
-    if (session) { const r = await sb.from('admins').select('user_id').eq('user_id', session.user.id).maybeSingle(); isAdmin = !!(r.data) }
-    $('crmSign').innerHTML = session ? `👤 <span class="t">${esc(session.user.email.split('@')[0])}</span>` : '🔑 <span class="t">Sign in</span>';
+    if (session) { const r = await sb.from('admins').select('user_id,name').eq('user_id', session.user.id).maybeSingle(); isAdmin = !!(r.data); me = { name: (r.data && r.data.name) || session.user.email.split('@')[0] } }
+    $('crmSign').innerHTML = session ? `👤 <span class="t">${esc(me.name || session.user.email.split('@')[0])}</span>` : '🔑 <span class="t">Sign in</span>';
     ['crmStats', 'crmCall', 'crmPipe', 'crmQueue'].forEach(id => $(id).hidden = !isAdmin);
     if (isAdmin) await load();
   }
@@ -165,6 +166,15 @@
   }
 
   let range = 30;
+  function teamHtml(sent, ev) {
+    const names = [...new Set(sent.map(o => o.sent_by_name).filter(Boolean).concat(ev.map(e => e.actor_name).filter(Boolean)))];
+    if (!names.length) return '';
+    const row = n => { const mine = sent.filter(o => o.sent_by_name === n); const keys = new Set(mine.map(o => o.company_key));
+      const v = new Set(data.events.filter(e => keys.has(e.company_key) && ['pack_view', 'email_open', 'email_click', 'call_click'].includes(e.type)).map(e => e.company_key)).size;
+      const won = data.companies.filter(c => keys.has(c.key) && c.status === 'won').length;
+      return `<tr><td><b>${esc(n)}</b></td><td>${mine.length}</td><td>${v}</td><td>${won}</td><td>${ev.filter(e => e.actor_name === n).length}</td></tr>` };
+    return `<div class="crm-card"><h3 class="st-h">Who did what</h3><div style="overflow-x:auto"><table class="st-tbl"><thead><tr><th>Person</th><th>Sent</th><th>Got interest</th><th>Won</th><th>Updates</th></tr></thead><tbody>${names.map(row).join('')}</tbody></table></div><p class="crm-note">“Got interest” counts companies that opened, clicked, viewed their pack or tapped Call after that person reached out.</p></div>`;
+  }
   function renderStats(body) {
     const since = range ? Date.now() - range * 864e5 : 0, inR = t => new Date(t).getTime() >= since;
     const ev = data.events.filter(e => inR(e.created_at) && e.company_key !== 'test-tal');
@@ -191,13 +201,13 @@
       const has = t => e.filter(x => x.type === t).length;
       const y = n => n ? `<span class="st-y">✓${n > 1 ? ' ' + n + '×' : ''}</span>` : '<span class="st-n">–</span>';
       const mail = o.channel === 'email';
-      return `<tr data-open="${esc(o.company_key)}"><td><b>${esc(cName(o.company_key))}</b><br><span class="crm-sub">${mail ? 'Email' : o.channel === 'text' ? 'Text' : 'Form'} · ${ago(o.sent_at)}</span></td><td>${mail ? (has('email_bounce') ? '<span style="color:#c2410c;font-weight:800">bounced</span>' : y(has('email_delivered'))) : '<span class="st-n">n/a</span>'}</td><td>${mail ? y(has('email_open')) : '<span class="st-n">n/a</span>'}</td><td>${mail ? y(has('email_click')) : '<span class="st-n">n/a</span>'}</td><td>${y(has('pack_view'))}</td><td>${y(has('call_click'))}</td></tr>`;
+      return `<tr data-open="${esc(o.company_key)}"><td><b>${esc(cName(o.company_key))}</b><br><span class="crm-sub">${mail ? 'Email' : o.channel === 'text' ? 'Text' : 'Form'} · ${ago(o.sent_at)}</span></td><td>${esc(o.sent_by_name || '–')}</td><td>${mail ? (has('email_bounce') ? '<span style="color:#c2410c;font-weight:800">bounced</span>' : y(has('email_delivered'))) : '<span class="st-n">n/a</span>'}</td><td>${mail ? y(has('email_open')) : '<span class="st-n">n/a</span>'}</td><td>${mail ? y(has('email_click')) : '<span class="st-n">n/a</span>'}</td><td>${y(has('pack_view'))}</td><td>${y(has('call_click'))}</td></tr>`;
     }).join('');
-    const feed = ev.slice(0, 15).map(e => `<li><span><b>${esc(cName(e.company_key))}</b> · ${({ pack_view: 'viewed the pack', pack_time: 'spent ' + ((e.meta || {}).seconds || 0) + ' s on the pack', call_click: 'tapped Call', reply_click: 'tapped email/text', cta_click: 'opened the homepage preview', email_sent: 'email sent', email_delivered: 'email delivered', email_open: 'opened the email', email_click: 'clicked the link', email_bounce: 'email bounced', email_reply: 'replied', note: esc((e.meta || {}).text || 'note') })[e.type] || esc(e.type)}</span><small>${ago(e.created_at)}</small></li>`).join('');
+    const feed = ev.slice(0, 15).map(e => `<li><span><b>${esc(cName(e.company_key))}</b> · ${({ pack_view: 'viewed the pack', pack_time: 'spent ' + ((e.meta || {}).seconds || 0) + ' s on the pack', call_click: 'tapped Call', reply_click: 'tapped email/text', cta_click: 'opened the homepage preview', email_sent: 'email sent', email_delivered: 'email delivered', email_open: 'opened the email', email_click: 'clicked the link', email_bounce: 'email bounced', email_reply: 'replied', note: esc((e.meta || {}).text || 'note'), status_change: esc((e.meta || {}).text || 'status changed') })[e.type] || esc(e.type)}${e.actor_name ? ` <b>· ${esc(e.actor_name)}</b>` : ''}</span><small>${ago(e.created_at)}</small></li>`).join('');
     body.innerHTML = `<div class="crm-filter">${[[7, 'Last 7 days'], [30, 'Last 30 days'], [0, 'All time']].map(([d, l]) => `<button class="crm-tab" data-r="${d}" aria-selected="${d === range}">${l}</button>`).join('')}</div>
 <div class="st-kpis">${k(sent.length, 'Messages sent', `${sentEmails.length} email · ${sent.length - sentEmails.length} text/form`)}${k(pct(opened, sentEmails.length), 'Email open rate', `${opened} of ${sentEmails.length} opened`)}${k(pct(clicked, sentEmails.length), 'Click rate', `${clicked} clicked the link`)}${k(viewers, 'Viewed their pack', avg ? `avg ${avg >= 60 ? Math.round(avg / 60) + ' min' : avg + ' s'} on page` : 'no views yet')}${k(callers, 'Tapped Call', 'from the pack page')}${k(pct(delivered, sentEmails.length), 'Delivered', bounced ? `${bounced} bounced` : 'no bounces')}${k(talking, 'Talking', 'replied or meeting set')}${k(won, 'Won', won ? '$' + (won * 250).toLocaleString() + ' at $250' : 'first one soon')}</div>
-<div class="crm-card"><h3 class="st-h">Pipeline</h3><div class="st-fun">${fun.map(([l, n]) => `<div class="st-fr"><span>${l}</span><div class="st-bar"><i style="width:${Math.max(n ? 3 : 0, 100 * n / max)}%"></i></div><em>${n}</em></div>`).join('')}</div><p class="crm-note">Every company counts toward the furthest step it has reached. All time.</p></div>
-<div class="crm-card"><h3 class="st-h">Every message sent</h3>${rows ? `<div style="overflow-x:auto"><table class="st-tbl"><thead><tr><th>Company</th><th>Delivered</th><th>Opened</th><th>Clicked</th><th>Viewed pack</th><th>Tapped Call</th></tr></thead><tbody>${rows}</tbody></table></div><p class="crm-note">Tap a row to open that company.</p>` : '<p class="crm-empty" style="padding:14px">Nothing sent in this period yet.</p>'}</div>
+${teamHtml(sent, ev)}<div class="crm-card"><h3 class="st-h">Pipeline</h3><div class="st-fun">${fun.map(([l, n]) => `<div class="st-fr"><span>${l}</span><div class="st-bar"><i style="width:${Math.max(n ? 3 : 0, 100 * n / max)}%"></i></div><em>${n}</em></div>`).join('')}</div><p class="crm-note">Every company counts toward the furthest step it has reached. All time.</p></div>
+<div class="crm-card"><h3 class="st-h">Every message sent</h3>${rows ? `<div style="overflow-x:auto"><table class="st-tbl"><thead><tr><th>Company</th><th>By</th><th>Delivered</th><th>Opened</th><th>Clicked</th><th>Viewed pack</th><th>Tapped Call</th></tr></thead><tbody>${rows}</tbody></table></div><p class="crm-note">Tap a row to open that company.</p>` : '<p class="crm-empty" style="padding:14px">Nothing sent in this period yet.</p>'}</div>
 <div class="crm-card"><h3 class="st-h">Latest activity</h3>${feed ? `<ul class="crm-tl">${feed}</ul>` : '<p class="crm-empty" style="padding:14px">No activity in this period yet.</p>'}</div>
 <p class="crm-note">Email opens are an estimate: some inboxes (Apple Mail, Gmail) open emails automatically or block the tracking image. Clicks, pack views and Call taps are exact.</p>`;
     body.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { range = +b.dataset.r; renderStats(body) });
@@ -223,7 +233,7 @@
   }
   function card(c) {
     const s = signals(c.key), ex = expanded === c.key, drafts = data.outreach.filter(o => o.company_key === c.key);
-    let h = `<div class="crm-card" data-card="${esc(c.key)}"><div class="crm-row"><div><h3>${esc(c.name)}</h3><div class="crm-sub">${esc(c.industry || '')} · ${esc(c.city || '')}${c.rating ? ` · ${c.rating}★ (${c.reviews || 0})` : ''}</div></div><span class="crm-pill ${c.status}">${SL[c.status]}</span></div>${sigHtml(s)}
+    let h = `<div class="crm-card" data-card="${esc(c.key)}"><div class="crm-row"><div><h3>${esc(c.name)}</h3><div class="crm-sub">${esc(c.industry || '')} · ${esc(c.city || '')}${c.rating ? ` · ${c.rating}★ (${c.reviews || 0})` : ''}${c.updated_by_name ? ` · last touched by ${esc(c.updated_by_name)}` : ''}</div></div><span class="crm-pill ${c.status}">${SL[c.status]}</span></div>${sigHtml(s)}
 <div class="crm-acts">${c.phone ? `<a class="crm-a go" href="${tel(c.phone)}">📞 Call</a>` : ''}${c.pack_url ? `<a class="crm-a" href="${esc(c.pack_url)}?from=floor" target="_blank" rel="noopener">Pack</a>` : ''}<button class="crm-a" data-x="${esc(c.key)}" aria-expanded="${ex}">${ex ? 'Close' : 'Open'}</button></div>`;
     if (ex) {
       h += `<div class="crm-f"><label>How to reach them</label><div class="crm-sub" style="font-size:13px;color:var(--fg)">${esc(c.contact_note || 'No notes yet.')}${c.email ? `<br>Email: <a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : ''}${c.website ? `<br>Website: ${esc(c.website)}` : ''}</div></div>
@@ -232,27 +242,29 @@
 <div class="crm-f"><label for="nt-${esc(c.key)}">Notes</label><textarea id="nt-${esc(c.key)}" data-notes="${esc(c.key)}" placeholder="Call notes, who you spoke to, what they said">${esc(c.notes || '')}</textarea><div class="crm-acts"><button class="crm-a" data-save="${esc(c.key)}">Save notes</button></div></div>`;
       drafts.forEach(o => {
         const canEmail = o.channel === 'email' && o.to_address;
-        h += `<div class="crm-f"><label>${o.channel === 'email' ? 'Email' : o.channel === 'text' ? 'Text message' : o.channel === 'form' ? 'Contact-form message' : o.channel} · ${o.status === 'draft' ? 'draft' : esc(o.status)}${o.sent_at ? ' ' + ago(o.sent_at) : ''}</label>${o.subject ? `<div style="font-weight:800;font-size:13.5px">${esc(o.subject)}</div>` : ''}<div class="crm-msg">${esc(o.body)}</div>
+        h += `<div class="crm-f"><label>${o.channel === 'email' ? 'Email' : o.channel === 'text' ? 'Text message' : o.channel === 'form' ? 'Contact-form message' : o.channel} · ${o.status === 'draft' ? 'draft' : esc(o.status)}${o.sent_at ? ' ' + ago(o.sent_at) : ''}${o.sent_by_name ? ' by ' + esc(o.sent_by_name) : ''}</label>${o.subject ? `<div style="font-weight:800;font-size:13.5px">${esc(o.subject)}</div>` : ''}<div class="crm-msg">${esc(fill(o.body))}</div>
 <div class="crm-acts"><button class="crm-a" data-copy="${o.id}">Copy message</button>${o.status !== 'sent' ? (canEmail ? `<button class="crm-a pri" data-send="${o.id}">Approve & send to ${esc(o.to_address)}</button>` : `<button class="crm-a pri" data-mark="${o.id}">I sent it</button>`) : ''}</div>${canEmail && o.status !== 'sent' ? '<p class="crm-note">Sends from your Resend address. Nothing goes out until you press it.</p>' : ''}</div>`;
       });
-      if (s.ev.length) h += `<div class="crm-f"><label>Activity</label><ul class="crm-tl">${s.ev.slice(0, 25).map(e => `<li><span>${({ pack_view: '👀 Viewed the ' + ((e.meta || {}).page === 'mock' ? 'homepage preview' : 'pack'), pack_time: '⏱ Spent ' + ((e.meta || {}).seconds || 0) + ' s on the ' + ((e.meta || {}).page === 'mock' ? 'preview' : 'pack'), call_click: '📞 Tapped a Call button', reply_click: '✉️ Tapped an email/text link', cta_click: '🖱 Opened the homepage preview', email_sent: '📤 Email sent', email_delivered: '📬 Email delivered', email_open: '✉️ Opened the email', email_click: '🔗 Clicked a link in the email', email_bounce: '⚠️ Email bounced', email_reply: '💬 Replied', note: '📝 ' + esc((e.meta || {}).text || 'Note') })[e.type] || esc(e.type)}</span><small>${ago(e.created_at)}</small></li>`).join('')}</ul></div>`;
+      if (s.ev.length) h += `<div class="crm-f"><label>Activity</label><ul class="crm-tl">${s.ev.slice(0, 25).map(e => `<li><span>${({ pack_view: '👀 Viewed the ' + ((e.meta || {}).page === 'mock' ? 'homepage preview' : 'pack'), pack_time: '⏱ Spent ' + ((e.meta || {}).seconds || 0) + ' s on the ' + ((e.meta || {}).page === 'mock' ? 'preview' : 'pack'), call_click: '📞 Tapped a Call button', reply_click: '✉️ Tapped an email/text link', cta_click: '🖱 Opened the homepage preview', email_sent: '📤 Email sent', email_delivered: '📬 Email delivered', email_open: '✉️ Opened the email', email_click: '🔗 Clicked a link in the email', email_bounce: '⚠️ Email bounced', email_reply: '💬 Replied', note: '📝 ' + esc((e.meta || {}).text || 'Note'), status_change: '🔀 ' + esc((e.meta || {}).text || 'Status changed') })[e.type] || esc(e.type)}${e.actor_name ? ` <b>· ${esc(e.actor_name)}</b>` : ''}</span><small>${ago(e.created_at)}</small></li>`).join('')}</ul></div>`;
     }
     return h + '</div>';
   }
-  async function upd(key, patch, msg) {
-    patch.updated_at = new Date().toISOString();
+  async function upd(key, patch, msg, logText) {
+    patch.updated_at = new Date().toISOString(); patch.updated_by_name = me.name;
     const r = await sb.from('companies').update(patch).eq('key', key); if (r.error) { toast('Couldn’t save: ' + r.error.message); return false }
-    const c = data.companies.find(x => x.key === key); Object.assign(c, patch); msg && toast(msg); return true;
+    const c = data.companies.find(x => x.key === key); Object.assign(c, patch); msg && toast(msg);
+    if (logText) { const ev = { company_key: key, type: logText[0], actor_id: session.user.id, actor_name: me.name, meta: { text: logText[1] } }; const r2 = await sb.from('events').insert(ev).select().single(); if (r2.data) data.events.unshift(r2.data) }
+    return true;
   }
   function wire(body) {
-    body.querySelectorAll('[data-status]').forEach(s => s.onchange = () => upd(s.dataset.status, { status: s.value }, 'Status saved'));
-    body.querySelectorAll('[data-fu]').forEach(s => s.onchange = () => upd(s.dataset.fu, { follow_up: s.value || null }, s.value ? 'Follow-up set' : 'Follow-up cleared'));
-    body.querySelectorAll('[data-save]').forEach(b => b.onclick = () => upd(b.dataset.save, { notes: body.querySelector(`[data-notes="${CSS.escape(b.dataset.save)}"]`).value }, 'Notes saved'));
-    body.querySelectorAll('[data-copy]').forEach(b => b.onclick = async () => { const o = data.outreach.find(x => x.id == b.dataset.copy); try { await navigator.clipboard.writeText((o.subject ? 'Subject: ' + o.subject + '\n\n' : '') + o.body); toast('Copied') } catch (e) { toast('Select the text and copy it') } });
+    body.querySelectorAll('[data-status]').forEach(s => s.onchange = () => upd(s.dataset.status, { status: s.value }, 'Status saved', ['status_change', 'Status changed to ' + SL[s.value]]));
+    body.querySelectorAll('[data-fu]').forEach(s => s.onchange = () => upd(s.dataset.fu, { follow_up: s.value || null }, s.value ? 'Follow-up set' : 'Follow-up cleared', ['note', s.value ? 'Follow-up set for ' + s.value : 'Follow-up cleared']));
+    body.querySelectorAll('[data-save]').forEach(b => b.onclick = () => upd(b.dataset.save, { notes: body.querySelector(`[data-notes="${CSS.escape(b.dataset.save)}"]`).value }, 'Notes saved', ['note', 'Updated the notes']));
+    body.querySelectorAll('[data-copy]').forEach(b => b.onclick = async () => { const o = data.outreach.find(x => x.id == b.dataset.copy); try { await navigator.clipboard.writeText((o.subject ? 'Subject: ' + o.subject + '\n\n' : '') + fill(o.body)); toast('Copied') } catch (e) { toast('Select the text and copy it') } });
     body.querySelectorAll('[data-mark]').forEach(b => b.onclick = async () => {
       const o = data.outreach.find(x => x.id == b.dataset.mark), now = new Date().toISOString();
-      const r = await sb.from('outreach').update({ status: 'sent', sent_at: now, approved_at: now }).eq('id', o.id); if (r.error) return toast(r.error.message);
-      await sb.from('events').insert({ company_key: o.company_key, type: 'note', meta: { text: (o.channel === 'text' ? 'Text' : o.channel === 'form' ? 'Contact-form message' : 'Message') + ' sent by you' } });
+      const r = await sb.from('outreach').update({ status: 'sent', sent_at: now, approved_at: now, sent_by: session.user.id, sent_by_name: me.name }).eq('id', o.id); if (r.error) return toast(r.error.message);
+      await sb.from('events').insert({ company_key: o.company_key, type: 'note', actor_id: session.user.id, actor_name: me.name, meta: { text: (o.channel === 'text' ? 'Text' : o.channel === 'form' ? 'Contact-form message' : 'Message') + ' sent' } });
       const c = data.companies.find(x => x.key === o.company_key); if (['found', 'pack_ready', 'approved'].includes(c.status)) await upd(c.key, { status: 'sent' });
       toast('Marked as sent'); showAdmin();
     });
