@@ -138,7 +138,8 @@
     if (session) { const r = await sb.from('admins').select('user_id,name').eq('user_id', session.user.id).maybeSingle(); isAdmin = !!(r.data); me = { name: (r.data && r.data.name) || session.user.email.split('@')[0] } }
     $('crmSign').innerHTML = session ? `👤 <span class="t">${esc(me.name || session.user.email.split('@')[0])}</span>` : '🔑 <span class="t">Sign in</span>';
     ['crmStats', 'crmTodo', 'crmPipe', 'crmQueue'].forEach(id => $(id).hidden = !isAdmin);
-    if (isAdmin) await load();
+    // mark this device as team so our own pack visits are never counted as customer views
+    if (isAdmin) { try { localStorage.setItem('24hw_me', me.name || '1') } catch (e) {} await load() }
   }
   $('crmSign').onclick = async () => {
     if (!session) return showSignIn('in');
