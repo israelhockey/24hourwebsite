@@ -11,6 +11,7 @@
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const ago = t => { const s = (Date.now() - new Date(t)) / 1000; if (s < 90) return 'just now'; if (s < 3600) return Math.round(s / 60) + ' min ago'; if (s < 86400) return Math.round(s / 3600) + ' h ago'; const d = Math.round(s / 86400); return d === 1 ? 'yesterday' : d + ' days ago' };
   const tel = p => p ? 'tel:' + p.replace(/[^\d+]/g, '') : null;
+  const sms = (p, body) => 'sms:' + p.replace(/[^\d+]/g, '') + (body ? '?&body=' + encodeURIComponent(body) : '');
 
   // ---------------------------------------------------------------- styles
   const css = document.createElement('style');
@@ -44,6 +45,9 @@
 .crm-filter{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
 .crm-toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--fg);color:#fff;padding:10px 16px;border-radius:999px;font-weight:700;z-index:70}
 .crm-note{font-size:12.5px;color:var(--muted);margin-top:6px}
+.crm-ct{display:grid;gap:6px} .crm-ctr{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center} .crm-ctr>span{font-size:13px;font-weight:700;color:var(--muted);min-width:22px}
+.crm-ctr input{font:inherit;font-size:14px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%;background:#fff;color:var(--fg)}
+.crm-send{background:#f3f5ff;border:1px solid #dfe4ff;border-radius:14px;padding:12px;margin-top:8px;display:grid;gap:7px} .crm-sendh{font-weight:800;font-size:13.5px}
 .st-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .st-k{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
 .st-k b{display:block;font-size:26px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums} .st-k span{font-size:12.5px;color:var(--muted);font-weight:700} .st-k small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
@@ -236,15 +240,26 @@ ${teamHtml(sent, ev)}<div class="crm-card"><h3 class="st-h">Pipeline</h3><div cl
     let h = `<div class="crm-card" data-card="${esc(c.key)}"><div class="crm-row"><div><h3>${esc(c.name)}</h3><div class="crm-sub">${esc(c.industry || '')} · ${esc(c.city || '')}${c.rating ? ` · ${c.rating}★ (${c.reviews || 0})` : ''}${c.updated_by_name ? ` · last touched by ${esc(c.updated_by_name)}` : ''}</div></div><span class="crm-pill ${c.status}">${SL[c.status]}</span></div>${sigHtml(s)}
 <div class="crm-acts">${c.phone ? `<a class="crm-a go" href="${tel(c.phone)}">📞 Call</a>` : ''}${c.pack_url ? `<a class="crm-a" href="${esc(c.pack_url)}?from=floor" target="_blank" rel="noopener">Pack</a>` : ''}<button class="crm-a" data-x="${esc(c.key)}" aria-expanded="${ex}">${ex ? 'Close' : 'Open'}</button></div>`;
     if (ex) {
-      h += `<div class="crm-f"><label>How to reach them</label><div class="crm-sub" style="font-size:13px;color:var(--fg)">${esc(c.contact_note || 'No notes yet.')}${c.email ? `<br>Email: <a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : ''}${c.website ? `<br>Website: ${esc(c.website)}` : ''}</div></div>
-<div class="crm-f"><label for="st-${esc(c.key)}">Status</label><select id="st-${esc(c.key)}" data-status="${esc(c.key)}">${STATUSES.map(([k, l]) => `<option value="${k}" ${k === c.status ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+      h += `<div class="crm-f"><label>Contact</label><div class="crm-ct">
+<div class="crm-ctr"><span>📧</span><input type="email" data-email="${esc(c.key)}" value="${esc(c.email || '')}" placeholder="No email yet: type the best one"><button class="crm-a" data-saveemail="${esc(c.key)}">Save</button></div>
+<div class="crm-ctr"><span>📱</span><input type="tel" data-phone="${esc(c.key)}" value="${esc(c.phone || '')}" placeholder="Best number"><button class="crm-a" data-savephone="${esc(c.key)}">Save</button></div>
+<div class="crm-acts" style="margin-top:4px">${c.phone ? `<a class="crm-a go" href="${tel(c.phone)}">📞 Call ${esc(c.phone)}</a><a class="crm-a" href="${sms(c.phone)}">💬 Text</a>` : ''}${c.email ? `<a class="crm-a" href="mailto:${esc(c.email)}">✉️ Open in my email app</a>` : ''}${c.website ? `<a class="crm-a" href="${c.website.startsWith('http') ? esc(c.website) : 'https://' + esc(c.website)}" target="_blank" rel="noopener">🌐 Their site</a>` : ''}</div>
+${c.contact_note ? `<p class="crm-note">${esc(c.contact_note)}</p>` : ''}</div></div>
+`;
+      drafts.forEach(o => {
+        const to = o.to_address || c.email || '', sent = o.status === 'sent';
+        h += `<div class="crm-f crm-draft"><label>Message · ${sent ? 'sent' + (o.sent_at ? ' ' + ago(o.sent_at) : '') + (o.sent_by_name ? ' by ' + esc(o.sent_by_name) : '') + (o.channel ? ' (' + esc(o.channel) + ')' : '') : 'draft'}</label>
+<div class="crm-msg">${esc(fill(o.body))}</div>
+${sent ? '' : `<div class="crm-send"><div class="crm-sendh">📧 Email it</div>
+<div class="crm-ctr"><span>To</span><input type="email" data-to="${o.id}" value="${esc(to)}" placeholder="their@email.com"></div>
+<div class="crm-ctr"><span>Subject</span><input type="text" data-subj="${o.id}" value="${esc(o.subject || 'quick thing about your website')}"></div>
+<div class="crm-acts"><button class="crm-a pri" data-send="${o.id}">Approve & send email</button></div>
+<p class="crm-note">Sends from ${esc(me.name || 'you')} at 24 Hour AI Solutions; replies come to your inbox. Nothing goes out until you tap twice.</p></div>
+<div class="crm-acts">${c.phone ? `<a class="crm-a" href="${sms(c.phone, fill(o.body))}">💬 Text it from my phone</a>` : ''}<button class="crm-a" data-copy="${o.id}">Copy message</button><button class="crm-a" data-mark="${o.id}">I sent it another way</button></div>`}</div>`;
+      });
+      h += `<div class="crm-f"><label for="st-${esc(c.key)}">Status</label><select id="st-${esc(c.key)}" data-status="${esc(c.key)}">${STATUSES.map(([k, l]) => `<option value="${k}" ${k === c.status ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
 <div class="crm-f"><label for="fu-${esc(c.key)}">Follow up on</label><input type="date" id="fu-${esc(c.key)}" data-fu="${esc(c.key)}" value="${esc(c.follow_up || '')}"></div>
 <div class="crm-f"><label for="nt-${esc(c.key)}">Notes</label><textarea id="nt-${esc(c.key)}" data-notes="${esc(c.key)}" placeholder="Call notes, who you spoke to, what they said">${esc(c.notes || '')}</textarea><div class="crm-acts"><button class="crm-a" data-save="${esc(c.key)}">Save notes</button></div></div>`;
-      drafts.forEach(o => {
-        const canEmail = o.channel === 'email' && o.to_address;
-        h += `<div class="crm-f"><label>${o.channel === 'email' ? 'Email' : o.channel === 'text' ? 'Text message' : o.channel === 'form' ? 'Contact-form message' : o.channel} · ${o.status === 'draft' ? 'draft' : esc(o.status)}${o.sent_at ? ' ' + ago(o.sent_at) : ''}${o.sent_by_name ? ' by ' + esc(o.sent_by_name) : ''}</label>${o.subject ? `<div style="font-weight:800;font-size:13.5px">${esc(o.subject)}</div>` : ''}<div class="crm-msg">${esc(fill(o.body))}</div>
-<div class="crm-acts"><button class="crm-a" data-copy="${o.id}">Copy message</button>${o.status !== 'sent' ? (canEmail ? `<button class="crm-a pri" data-send="${o.id}">Approve & send to ${esc(o.to_address)}</button>` : `<button class="crm-a pri" data-mark="${o.id}">I sent it</button>`) : ''}</div>${canEmail && o.status !== 'sent' ? '<p class="crm-note">Sends from your Resend address. Nothing goes out until you press it.</p>' : ''}</div>`;
-      });
       if (s.ev.length) h += `<div class="crm-f"><label>Activity</label><ul class="crm-tl">${s.ev.slice(0, 25).map(e => `<li><span>${({ pack_view: '👀 Viewed the ' + ((e.meta || {}).page === 'mock' ? 'homepage preview' : 'pack'), pack_time: '⏱ Spent ' + ((e.meta || {}).seconds || 0) + ' s on the ' + ((e.meta || {}).page === 'mock' ? 'preview' : 'pack'), call_click: '📞 Tapped a Call button', reply_click: '✉️ Tapped an email/text link', cta_click: '🖱 Opened the homepage preview', email_sent: '📤 Email sent', email_delivered: '📬 Email delivered', email_open: '✉️ Opened the email', email_click: '🔗 Clicked a link in the email', email_bounce: '⚠️ Email bounced', email_reply: '💬 Replied', note: '📝 ' + esc((e.meta || {}).text || 'Note'), status_change: '🔀 ' + esc((e.meta || {}).text || 'Status changed') })[e.type] || esc(e.type)}${e.actor_name ? ` <b>· ${esc(e.actor_name)}</b>` : ''}</span><small>${ago(e.created_at)}</small></li>`).join('')}</ul></div>`;
     }
     return h + '</div>';
@@ -268,12 +283,19 @@ ${teamHtml(sent, ev)}<div class="crm-card"><h3 class="st-h">Pipeline</h3><div cl
       const c = data.companies.find(x => x.key === o.company_key); if (['found', 'pack_ready', 'approved'].includes(c.status)) await upd(c.key, { status: 'sent' });
       toast('Marked as sent'); showAdmin();
     });
+    body.querySelectorAll('[data-saveemail]').forEach(b => b.onclick = () => { const v = body.querySelector(`[data-email="${CSS.escape(b.dataset.saveemail)}"]`).value.trim(); upd(b.dataset.saveemail, { email: v || null }, 'Email saved', ['note', v ? 'Email set to ' + v : 'Email cleared']).then(() => showAdmin()) });
+    body.querySelectorAll('[data-savephone]').forEach(b => b.onclick = () => { const v = body.querySelector(`[data-phone="${CSS.escape(b.dataset.savephone)}"]`).value.trim(); upd(b.dataset.savephone, { phone: v || null }, 'Number saved', ['note', v ? 'Number set to ' + v : 'Number cleared']).then(() => showAdmin()) });
     body.querySelectorAll('[data-send]').forEach(b => b.onclick = async () => {
       const o = data.outreach.find(x => x.id == b.dataset.send);
-      if (!confirmInline(b, `Send to ${o.to_address}?`)) return;
+      const to = body.querySelector(`[data-to="${o.id}"]`).value.trim(), subj = body.querySelector(`[data-subj="${o.id}"]`).value.trim();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) { toast('Type a valid email address first'); return }
+      if (!confirmInline(b, `Send to ${to}?`)) return;
       b.disabled = true; b.textContent = 'Sending…';
+      const u = await sb.from('outreach').update({ to_address: to, subject: subj || 'quick thing about your website', channel: 'email' }).eq('id', o.id);
+      if (u.error) { b.disabled = false; b.textContent = 'Approve & send email'; return toast(u.error.message) }
+      const c = data.companies.find(x => x.key === o.company_key); if (c && !c.email) await upd(c.key, { email: to });
       const r = await sb.functions.invoke('send-outreach', { body: { outreach_id: o.id } });
-      if (r.error || (r.data && r.data.error)) { b.disabled = false; b.textContent = 'Approve & send'; return toast((r.data && r.data.error) || 'Sending isn’t set up yet') }
+      if (r.error || (r.data && r.data.error)) { b.disabled = false; b.textContent = 'Approve & send email'; let m = r.data && r.data.error; if (!m && r.error && r.error.context) { try { m = (await r.error.context.json()).error } catch (e) {} } return toast(m || 'Couldn’t send') }
       toast('Sent'); showAdmin();
     });
   }
