@@ -213,7 +213,7 @@
       toast('Sent'); showAdmin();
     });
   }
-  function confirmInline(b, q) { if (b.dataset.armed) return true; b.dataset.armed = '1'; const t = b.textContent; b.textContent = q + ' Press again'; setTimeout(() => { delete b.dataset.armed; if (!b.disabled) b.textContent = t }, 4000); return false }
+  function confirmInline(b, q) { if (b.dataset.armed) return true; b.dataset.armed = '1'; const t = b.textContent; b.textContent = '✅ ' + q + ' Tap again to send'; b.style.background = '#14b8a6'; b.style.borderColor = '#14b8a6'; toast('Tap the green button again to send'); setTimeout(() => { delete b.dataset.armed; if (!b.disabled) { b.textContent = t; b.style.background = ''; b.style.borderColor = '' } }, 12000); return false }
   function renderQueue(body) {
     body.innerHTML = `<div class="crm-card"><h3 style="margin:0">Queue a new run</h3><p class="crm-sub">Pick a city and an industry. Claude starts queued runs the next time you open the chat, and the agents show up working here.</p>
 <form id="crmQ"><div class="crm-f"><label for="qCity">City</label><input id="qCity" required placeholder="Mesa, AZ"></div><div class="crm-f"><label for="qInd">Industry</label><input id="qInd" required placeholder="Pool cleaning"></div>
