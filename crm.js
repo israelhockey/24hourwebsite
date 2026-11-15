@@ -44,13 +44,24 @@
 .crm-filter{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
 .crm-toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--fg);color:#fff;padding:10px 16px;border-radius:999px;font-weight:700;z-index:70}
 .crm-note{font-size:12.5px;color:var(--muted);margin-top:6px}
+.st-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.st-k{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.st-k b{display:block;font-size:26px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums} .st-k span{font-size:12.5px;color:var(--muted);font-weight:700} .st-k small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.st-fun{display:grid;gap:7px;margin-top:6px} .st-fr{display:grid;grid-template-columns:110px minmax(0,1fr) 34px;gap:8px;align-items:center;font-size:12.5px;font-weight:700}
+.st-bar{height:12px;border-radius:999px;background:#eef0f5;overflow:hidden} .st-bar i{display:block;height:100%;border-radius:999px;background:#3d5afe}
+.st-fr:nth-child(n+4) .st-bar i{background:#14b8a6} .st-fr:last-child .st-bar i{background:#16a34a} .st-fr em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums}
+.st-tbl{width:100%;border-collapse:collapse;font-size:12.5px} .st-tbl th{text-align:left;color:var(--muted);font-weight:700;padding:6px 4px;border-bottom:1px solid var(--line);white-space:nowrap}
+.st-tbl td{padding:8px 4px;border-bottom:1px solid var(--line);vertical-align:top} .st-tbl tr[data-open]{cursor:pointer} .st-tbl tr[data-open]:hover td{background:#f6f7fb}
+.st-y{color:#0f766e;font-weight:800} .st-n{color:#b8bdd1} .st-h{margin:0 0 8px;font-size:15px;font-weight:800}
+@media (min-width:520px){.st-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
 `;
   document.head.appendChild(css);
 
   // ---------------------------------------------------------------- toolbar
   const bar = document.querySelector('.bar'); if (!bar) return;
   const box = document.createElement('div'); box.className = 'crm-btns';
-  box.innerHTML = `<button class="crm-btn" id="crmCall" type="button" hidden>📞 <span class="t">Call list</span> <span class="n" id="crmCallN" hidden></span></button>
+  box.innerHTML = `<button class="crm-btn" id="crmStats" type="button" hidden>📈 <span class="t">Stats</span></button>
+<button class="crm-btn" id="crmCall" type="button" hidden>📞 <span class="t">Call list</span> <span class="n" id="crmCallN" hidden></span></button>
 <button class="crm-btn" id="crmPipe" type="button" hidden>🗂️ <span class="t">Pipeline</span></button>
 <button class="crm-btn pri" id="crmQueue" type="button" hidden>➕ <span class="t">Queue run</span></button>
 <button class="crm-btn" id="crmSign" type="button">🔑 <span class="t">Sign in</span></button>`;
@@ -96,7 +107,7 @@
     isAdmin = false;
     if (session) { const r = await sb.from('admins').select('user_id').eq('user_id', session.user.id).maybeSingle(); isAdmin = !!(r.data) }
     $('crmSign').innerHTML = session ? `👤 <span class="t">${esc(session.user.email.split('@')[0])}</span>` : '🔑 <span class="t">Sign in</span>';
-    ['crmCall', 'crmPipe', 'crmQueue'].forEach(id => $(id).hidden = !isAdmin);
+    ['crmStats', 'crmCall', 'crmPipe', 'crmQueue'].forEach(id => $(id).hidden = !isAdmin);
     if (isAdmin) await load();
   }
   $('crmSign').onclick = async () => {
@@ -108,6 +119,7 @@
   $('crmCall').onclick = () => { open = 'calls'; showAdmin() };
   $('crmPipe').onclick = () => { open = 'all'; showAdmin() };
   $('crmQueue').onclick = () => { open = 'queue'; showAdmin() };
+  $('crmStats').onclick = () => { open = 'stats'; showAdmin() };
 
   // ---------------------------------------------------------------- data
   async function load() {
@@ -146,10 +158,50 @@
   // ---------------------------------------------------------------- views
   async function showAdmin() {
     if (!isAdmin) return showSignIn('in');
-    const body = panel('Pipeline', [['calls', '📞 Call list'], ['all', '🗂️ Companies'], ['queue', '➕ Run queue']]);
+    const body = panel('Pipeline', [['stats', '📈 Stats'], ['calls', '📞 Call list'], ['all', '🗂️ Companies'], ['queue', '➕ Run queue']]);
     body.innerHTML = '<p class="crm-empty">Loading…</p>';
     await load();
-    if (open === 'calls') renderCalls(body); else if (open === 'queue') renderQueue(body); else renderAll(body);
+    if (open === 'stats') renderStats(body); else if (open === 'calls') renderCalls(body); else if (open === 'queue') renderQueue(body); else renderAll(body);
+  }
+
+  let range = 30;
+  function renderStats(body) {
+    const since = range ? Date.now() - range * 864e5 : 0, inR = t => new Date(t).getTime() >= since;
+    const ev = data.events.filter(e => inR(e.created_at) && e.company_key !== 'test-tal');
+    const sent = data.outreach.filter(o => o.status === 'sent' && o.sent_at && inR(o.sent_at) && o.company_key !== 'test-tal');
+    const sentEmails = sent.filter(o => o.channel === 'email');
+    const uniq = (type, keys) => new Set(ev.filter(e => e.type === type && (!keys || keys.has(e.company_key))).map(e => e.company_key)).size;
+    const emailKeys = new Set(sentEmails.map(o => o.company_key));
+    const delivered = uniq('email_delivered', emailKeys), opened = uniq('email_open', emailKeys), clicked = uniq('email_click', emailKeys), bounced = uniq('email_bounce', emailKeys);
+    const viewers = uniq('pack_view'), callers = uniq('call_click');
+    const secs = ev.filter(e => e.type === 'pack_time').map(e => +(e.meta || {}).seconds || 0).filter(x => x > 0);
+    const avg = secs.length ? Math.round(secs.reduce((a, b) => a + b, 0) / secs.length) : 0;
+    const cs = data.companies.filter(c => c.key !== 'test-tal');
+    const pct = (a, b) => b ? Math.round(100 * a / b) + '%' : '–';
+    const won = cs.filter(c => c.status === 'won').length, talking = cs.filter(c => ['replied', 'meeting'].includes(c.status)).length;
+    const k = (v, l, sub) => `<div class="st-k"><b>${v}</b><span>${l}</span>${sub ? `<small>${sub}</small>` : ''}</div>`;
+    // funnel (all time, by current stage reached)
+    const ORDER = ['found', 'pack_ready', 'approved', 'sent', 'opened', 'viewed', 'called', 'replied', 'meeting', 'won'];
+    const reached = st => cs.filter(c => ORDER.indexOf(c.status) >= ORDER.indexOf(st)).length;
+    const fun = [['Found', cs.filter(c => c.status !== 'do_not_contact').length], ['Pack built', reached('pack_ready')], ['Contacted', reached('sent')], ['Opened / viewed', reached('opened')], ['Talking', reached('replied')], ['Won', won]];
+    const max = Math.max(1, fun[0][1]);
+    const cName = key => (cs.find(c => c.key === key) || {}).name || key;
+    const rows = sent.sort((a, b) => b.sent_at.localeCompare(a.sent_at)).map(o => {
+      const e = data.events.filter(x => x.company_key === o.company_key && new Date(x.created_at) >= new Date(o.sent_at));
+      const has = t => e.filter(x => x.type === t).length;
+      const y = n => n ? `<span class="st-y">✓${n > 1 ? ' ' + n + '×' : ''}</span>` : '<span class="st-n">–</span>';
+      const mail = o.channel === 'email';
+      return `<tr data-open="${esc(o.company_key)}"><td><b>${esc(cName(o.company_key))}</b><br><span class="crm-sub">${mail ? 'Email' : o.channel === 'text' ? 'Text' : 'Form'} · ${ago(o.sent_at)}</span></td><td>${mail ? (has('email_bounce') ? '<span style="color:#c2410c;font-weight:800">bounced</span>' : y(has('email_delivered'))) : '<span class="st-n">n/a</span>'}</td><td>${mail ? y(has('email_open')) : '<span class="st-n">n/a</span>'}</td><td>${mail ? y(has('email_click')) : '<span class="st-n">n/a</span>'}</td><td>${y(has('pack_view'))}</td><td>${y(has('call_click'))}</td></tr>`;
+    }).join('');
+    const feed = ev.slice(0, 15).map(e => `<li><span><b>${esc(cName(e.company_key))}</b> · ${({ pack_view: 'viewed the pack', pack_time: 'spent ' + ((e.meta || {}).seconds || 0) + ' s on the pack', call_click: 'tapped Call', reply_click: 'tapped email/text', cta_click: 'opened the homepage preview', email_sent: 'email sent', email_delivered: 'email delivered', email_open: 'opened the email', email_click: 'clicked the link', email_bounce: 'email bounced', email_reply: 'replied', note: esc((e.meta || {}).text || 'note') })[e.type] || esc(e.type)}</span><small>${ago(e.created_at)}</small></li>`).join('');
+    body.innerHTML = `<div class="crm-filter">${[[7, 'Last 7 days'], [30, 'Last 30 days'], [0, 'All time']].map(([d, l]) => `<button class="crm-tab" data-r="${d}" aria-selected="${d === range}">${l}</button>`).join('')}</div>
+<div class="st-kpis">${k(sent.length, 'Messages sent', `${sentEmails.length} email · ${sent.length - sentEmails.length} text/form`)}${k(pct(opened, sentEmails.length), 'Email open rate', `${opened} of ${sentEmails.length} opened`)}${k(pct(clicked, sentEmails.length), 'Click rate', `${clicked} clicked the link`)}${k(viewers, 'Viewed their pack', avg ? `avg ${avg >= 60 ? Math.round(avg / 60) + ' min' : avg + ' s'} on page` : 'no views yet')}${k(callers, 'Tapped Call', 'from the pack page')}${k(pct(delivered, sentEmails.length), 'Delivered', bounced ? `${bounced} bounced` : 'no bounces')}${k(talking, 'Talking', 'replied or meeting set')}${k(won, 'Won', won ? '$' + (won * 250).toLocaleString() + ' at $250' : 'first one soon')}</div>
+<div class="crm-card"><h3 class="st-h">Pipeline</h3><div class="st-fun">${fun.map(([l, n]) => `<div class="st-fr"><span>${l}</span><div class="st-bar"><i style="width:${Math.max(n ? 3 : 0, 100 * n / max)}%"></i></div><em>${n}</em></div>`).join('')}</div><p class="crm-note">Every company counts toward the furthest step it has reached. All time.</p></div>
+<div class="crm-card"><h3 class="st-h">Every message sent</h3>${rows ? `<div style="overflow-x:auto"><table class="st-tbl"><thead><tr><th>Company</th><th>Delivered</th><th>Opened</th><th>Clicked</th><th>Viewed pack</th><th>Tapped Call</th></tr></thead><tbody>${rows}</tbody></table></div><p class="crm-note">Tap a row to open that company.</p>` : '<p class="crm-empty" style="padding:14px">Nothing sent in this period yet.</p>'}</div>
+<div class="crm-card"><h3 class="st-h">Latest activity</h3>${feed ? `<ul class="crm-tl">${feed}</ul>` : '<p class="crm-empty" style="padding:14px">No activity in this period yet.</p>'}</div>
+<p class="crm-note">Email opens are an estimate: some inboxes (Apple Mail, Gmail) open emails automatically or block the tracking image. Clicks, pack views and Call taps are exact.</p>`;
+    body.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { range = +b.dataset.r; renderStats(body) });
+    body.querySelectorAll('tr[data-open]').forEach(r => r.onclick = () => { open = 'all'; filt = 'all'; expanded = r.dataset.open; showAdmin() });
   }
   function renderCalls(body) {
     const list = callList();
