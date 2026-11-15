@@ -23,9 +23,17 @@
 .crm-panel{position:fixed;top:0;right:0;bottom:0;width:min(560px,100vw);background:var(--bg);z-index:61;display:flex;flex-direction:column;box-shadow:-20px 0 60px rgba(22,26,43,.18)}
 .crm-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 18px 10px}
 .crm-head h2{margin:0;font-size:19px;font-weight:800} .crm-x{border:0;background:var(--card);width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer}
-.crm-tabs{display:flex;gap:6px;padding:0 18px 12px;flex-wrap:wrap} .crm-tab{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 13px;font-weight:700;font-size:12.5px;cursor:pointer;color:var(--fg)}
+.crm-tabs{display:flex;gap:6px;padding:0 18px 12px;overflow-x:auto} .crm-tabs .crm-tab{flex:none;white-space:nowrap} .crm-tab{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 13px;font-weight:700;font-size:12.5px;cursor:pointer;color:var(--fg)}
 .crm-tab[aria-selected=true]{background:var(--fg);color:#fff;border-color:var(--fg)}
-.crm-body{overflow:auto;padding:0 18px 24px;flex:1;display:grid;gap:10px;align-content:start}
+.crm-body{overflow:auto;padding:0 18px 24px;flex:1;display:grid;grid-template-columns:minmax(0,1fr);gap:10px;align-content:start}
+.crm-back{border:0;background:var(--card);border-radius:999px;padding:8px 14px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;color:var(--fg)} .crm-head h2:empty{display:none} .crm-head .crm-x{margin-left:auto}
+.crm-tab .c{font-weight:800}
+.crm-sec{display:grid;gap:10px;margin-top:6px} .crm-sec h3{margin:8px 0 0;font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px} .crm-sec h3 span{background:var(--fg);color:#fff;border-radius:999px;font-size:12px;padding:1px 9px}
+.crm-sec .crm-note{margin:0} .crm-done{margin:0;color:var(--muted);font-size:13px;font-weight:600}
+.crm-list{display:grid;background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.crm-li{display:grid;grid-template-columns:minmax(0,1fr) auto 14px;gap:10px;align-items:center;text-align:left;font:inherit;background:none;border:0;border-bottom:1px solid var(--line);padding:12px 14px;cursor:pointer;color:var(--fg)} .crm-li:last-child{border-bottom:0} .crm-li:hover{background:#f6f7fb}
+.crm-li .nm b{display:block;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .crm-li small{color:var(--muted);font-size:12px} .crm-li i{font-style:normal;color:var(--muted);font-size:18px}
+.crm-send details{font-size:13px} .crm-send summary{cursor:pointer;font-weight:700;color:var(--muted)}
 .crm-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px}
 .crm-row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 .crm-row h3{margin:0;font-size:15.5px;font-weight:800} .crm-sub{color:var(--muted);font-size:12.5px;margin-top:2px}
@@ -44,7 +52,7 @@
 .crm-empty{color:var(--muted);text-align:center;padding:30px 10px}
 .crm-filter{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
 .crm-filter .crm-tab{white-space:nowrap;flex:none}
-.crm-tools{display:flex;gap:8px;margin:8px 0}.crm-tools input,.crm-tools select{font:inherit;font-size:13px;border:1px solid var(--line);border-radius:10px;padding:7px 10px;background:#fff;min-width:0}.crm-tools input{flex:1}
+.crm-tools{display:flex;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:2;background:var(--bg);padding:6px 0 8px}.crm-tools input,.crm-tools select{font:inherit;font-size:13px;border:1px solid var(--line);border-radius:10px;padding:7px 10px;background:#fff;min-width:0}.crm-tools input{flex:1 1 100%} .crm-tools select{flex:1}
 .crm-quick details{font-size:13px}.crm-quick summary{cursor:pointer;font-weight:700;color:var(--muted,#555)}.crm-quick .crm-msg{margin-top:6px}
 .crm-toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--fg);color:#fff;padding:10px 16px;border-radius:999px;font-weight:700;z-index:70}
 .crm-note{font-size:12.5px;color:var(--muted);margin-top:6px}
@@ -67,28 +75,42 @@
   // ---------------------------------------------------------------- toolbar
   const bar = document.querySelector('.bar'); if (!bar) return;
   const box = document.createElement('div'); box.className = 'crm-btns';
-  box.innerHTML = `<button class="crm-btn" id="crmStats" type="button" hidden>📈 <span class="t">Stats</span></button>
-<button class="crm-btn" id="crmCall" type="button" hidden>📞 <span class="t">Call list</span> <span class="n" id="crmCallN" hidden></span></button>
-<button class="crm-btn" id="crmPipe" type="button" hidden>🗂️ <span class="t">Pipeline</span></button>
-<button class="crm-btn pri" id="crmQueue" type="button" hidden>➕ <span class="t">Queue run</span></button>
+  box.innerHTML = `<button class="crm-btn pri" id="crmTodo" type="button" hidden>✅ <span class="t">To do</span> <span class="n" id="crmTodoN" hidden></span></button>
+<button class="crm-btn" id="crmPipe" type="button" hidden>🗂️ <span class="t">Companies</span></button>
+<button class="crm-btn" id="crmStats" type="button" hidden>📈 <span class="t">Stats</span></button>
+<button class="crm-btn" id="crmQueue" type="button" hidden>➕ <span class="t">New run</span></button>
 <button class="crm-btn" id="crmSign" type="button">🔑 <span class="t">Sign in</span></button>`;
   const pill = bar.querySelector('.pillbar'); pill ? pill.after(box) : bar.prepend(box);
   const $ = id => document.getElementById(id);
-  let session = null, isAdmin = false, me = { name: '' }, data = { companies: [], events: [], outreach: [], requests: [] }, open = null, filt = 'email', expanded = null, q = '', city = '';
+  let session = null, isAdmin = false, me = { name: '' }, data = { companies: [], events: [], outreach: [], requests: [] }, open = null, filt = 'active', detail = null, back = null, backY = 0, q = '', city = '';
 
   const fill = t => String(t || '').split('{sender}').join(me.name || 'Tom');
   function toast(t) { const d = document.createElement('div'); d.className = 'crm-toast'; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 2600) }
 
   // ---------------------------------------------------------------- panel shell
-  function panel(title, tabs) {
+  const TABS = [['todo', '✅ To do'], ['all', '🗂️ Companies'], ['stats', '📈 Stats'], ['queue', '➕ New run']];
+  function frame(cls, label) {
     close();
     const v = document.createElement('div'); v.className = 'crm-veil'; v.onclick = close;
-    const p = document.createElement('aside'); p.className = 'crm-panel'; p.setAttribute('role', 'dialog'); p.setAttribute('aria-label', title);
-    p.innerHTML = `<div class="crm-head"><h2>${esc(title)}</h2><button class="crm-x" type="button" aria-label="Close">×</button></div>${tabs ? `<div class="crm-tabs" role="tablist">${tabs.map(([k, l]) => `<button class="crm-tab" role="tab" data-k="${k}" aria-selected="${k === open}">${l}</button>`).join('')}</div>` : ''}<div class="crm-body" id="crmBody"></div>`;
-    p.querySelector('.crm-x').onclick = close;
-    p.querySelectorAll('.crm-tab').forEach(b => b.onclick = () => { open = b.dataset.k; showAdmin() });
+    const p = document.createElement('aside'); p.className = 'crm-panel ' + cls; p.setAttribute('role', 'dialog'); p.setAttribute('aria-label', label);
     document.body.append(v, p); document.addEventListener('keydown', escKey);
+    return p;
+  }
+  function panel(title) {
+    const p = frame('', title);
+    p.innerHTML = `<div class="crm-head"><h2>${esc(title)}</h2><button class="crm-x" type="button" aria-label="Close">×</button></div><div class="crm-body" id="crmBody"></div>`;
+    p.querySelector('.crm-x').onclick = close;
     return p.querySelector('#crmBody');
+  }
+  function shell() {
+    let p = document.querySelector('.crm-panel.adm'); if (p) return p;
+    p = frame('adm', 'Pipeline');
+    p.innerHTML = `<div class="crm-head"><button class="crm-back" type="button" hidden>← Back</button><h2></h2><button class="crm-x" type="button" aria-label="Close">×</button></div>
+<div class="crm-tabs" role="tablist">${TABS.map(([k, l]) => `<button class="crm-tab" role="tab" data-k="${k}">${l}<span class="c"></span></button>`).join('')}</div><div class="crm-body" id="crmBody"></div>`;
+    p.querySelector('.crm-x').onclick = close;
+    p.querySelector('.crm-back').onclick = () => { open = back || 'todo'; const y = backY; detail = null; showAdmin(false, y) };
+    p.querySelectorAll('.crm-tab').forEach(b => b.onclick = () => { open = b.dataset.k; detail = null; showAdmin() });
+    return p;
   }
   function escKey(e) { if (e.key === 'Escape') close() }
   function close() { document.querySelectorAll('.crm-veil,.crm-panel').forEach(n => n.remove()); document.removeEventListener('keydown', escKey) }
@@ -107,7 +129,7 @@
       const r = mode === 'up' ? await sb.auth.signUp({ email, password, options: { emailRedirectTo: location.origin + location.pathname } }) : await sb.auth.signInWithPassword({ email, password });
       if (r.error) { m.textContent = r.error.message; return }
       if (mode === 'up' && !r.data.session) { m.textContent = 'Check your email and click the confirmation link, then come back and sign in.'; return }
-      close(); await refreshAuth(); if (isAdmin) { open = 'calls'; showAdmin() }
+      close(); await refreshAuth(); if (isAdmin) { open = 'todo'; showAdmin() }
     };
   }
   async function refreshAuth() {
@@ -115,7 +137,7 @@
     isAdmin = false;
     if (session) { const r = await sb.from('admins').select('user_id,name').eq('user_id', session.user.id).maybeSingle(); isAdmin = !!(r.data); me = { name: (r.data && r.data.name) || session.user.email.split('@')[0] } }
     $('crmSign').innerHTML = session ? `👤 <span class="t">${esc(me.name || session.user.email.split('@')[0])}</span>` : '🔑 <span class="t">Sign in</span>';
-    ['crmStats', 'crmCall', 'crmPipe', 'crmQueue'].forEach(id => $(id).hidden = !isAdmin);
+    ['crmStats', 'crmTodo', 'crmPipe', 'crmQueue'].forEach(id => $(id).hidden = !isAdmin);
     if (isAdmin) await load();
   }
   $('crmSign').onclick = async () => {
@@ -124,8 +146,8 @@
     body.innerHTML = `<div class="crm-card"><h3 style="margin:0 0 4px">${esc(session.user.email)}</h3><p class="crm-sub">${isAdmin ? 'You have full access.' : 'Signed in, waiting for access. Ask Claude to give this account admin access.'}</p><p class="crm-sub" style="word-break:break-all">Account ID: ${esc(session.user.id)}</p><div class="crm-acts"><button class="crm-a" id="crmOut" type="button">Sign out</button></div></div>`;
     $('crmOut').onclick = async () => { await sb.auth.signOut(); close(); await refreshAuth() };
   };
-  $('crmCall').onclick = () => { open = 'calls'; showAdmin() };
-  $('crmPipe').onclick = () => { open = 'all'; showAdmin() };
+  $('crmTodo').onclick = () => { open = 'todo'; detail = null; showAdmin() };
+  $('crmPipe').onclick = () => { open = 'all'; detail = null; showAdmin() };
   $('crmQueue').onclick = () => { open = 'queue'; showAdmin() };
   $('crmStats').onclick = () => { open = 'stats'; showAdmin() };
 
@@ -137,7 +159,7 @@
       sb.from('outreach').select('*').order('created_at', { ascending: false }),
       sb.from('run_requests').select('*').order('created_at', { ascending: false }).limit(50)]);
     data = { companies: c.data || [], events: e.data || [], outreach: o.data || [], requests: q.data || [] };
-    const n = callList().length; $('crmCallN').hidden = !n; $('crmCallN').textContent = n;
+    const n = todo().total; $('crmTodoN').hidden = !n; $('crmTodoN').textContent = n;
   }
   function signals(key) {
     const ev = data.events.filter(x => x.company_key === key);
@@ -164,13 +186,21 @@
   }
 
   // ---------------------------------------------------------------- views
-  async function showAdmin() {
+  async function showAdmin(keep, y) {
     if (!isAdmin) return showSignIn('in');
-    const body = panel('Pipeline', [['stats', '📈 Stats'], ['calls', '📞 Call list'], ['all', '🗂️ Pipeline'], ['queue', '➕ Run queue']]);
-    body.innerHTML = '<p class="crm-empty">Loading…</p>';
+    const p = shell(), body = p.querySelector('.crm-body'), top = keep ? body.scrollTop : (y || 0);
+    if (!keep) body.innerHTML = '<p class="crm-empty">Loading…</p>';
     await load();
-    if (open === 'stats') renderStats(body); else if (open === 'calls') renderCalls(body); else if (open === 'queue') renderQueue(body); else renderAll(body);
+    if (open === 'detail' && !data.companies.find(c => c.key === detail)) open = back || 'todo';
+    const t = todo();
+    p.querySelector('h2').textContent = open === 'detail' ? '' : (TABS.find(x => x[0] === open) || TABS[0])[1].replace(/^\S+\s/, '');
+    p.querySelector('.crm-back').hidden = open !== 'detail';
+    p.querySelectorAll('.crm-tab').forEach(b => { b.setAttribute('aria-selected', b.dataset.k === (open === 'detail' ? back : open)); if (b.dataset.k === 'todo') b.querySelector('.c').textContent = t.total ? ' · ' + t.total : '' });
+    if (open === 'stats') renderStats(body); else if (open === 'queue') renderQueue(body); else if (open === 'all') renderAll(body); else if (open === 'detail') renderDetail(body); else { open = 'todo'; renderTodo(body, t) }
+    body.scrollTop = top;
   }
+  const refresh = () => showAdmin(true);
+  function openDetail(key) { const body = document.querySelector('.crm-panel.adm .crm-body'); if (open !== 'detail') { back = open; backY = body ? body.scrollTop : 0 } detail = key; open = 'detail'; showAdmin() }
 
   let range = 30;
   function teamHtml(sent, ev) {
@@ -218,59 +248,92 @@ ${teamHtml(sent, ev)}<div class="crm-card"><h3 class="st-h">Pipeline</h3><div cl
 <div class="crm-card"><h3 class="st-h">Latest activity</h3>${feed ? `<ul class="crm-tl">${feed}</ul>` : '<p class="crm-empty" style="padding:14px">No activity in this period yet.</p>'}</div>
 <p class="crm-note">Email opens are an estimate: some inboxes (Apple Mail, Gmail) open emails automatically or block the tracking image. Clicks, pack views and Call taps are exact.</p>`;
     body.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { range = +b.dataset.r; renderStats(body) });
-    body.querySelectorAll('tr[data-open]').forEach(r => r.onclick = () => { open = 'all'; filt = 'all'; expanded = r.dataset.open; showAdmin() });
-  }
-  function renderCalls(body) {
-    const list = callList();
-    if (!list.length) { body.innerHTML = '<div class="crm-card crm-empty">Nobody to call yet. When a company opens its pack, taps Call or has a follow-up due, it shows up here.</div>'; return }
-    body.innerHTML = list.map(({ c, s, due }) => `<div class="crm-card"><div class="crm-row"><div><h3>${esc(c.name)}</h3><div class="crm-sub">${esc(c.industry || '')} · ${esc(c.city || '')}${due ? ` · <b style="color:#c2410c">follow-up due ${esc(c.follow_up)}</b>` : ''}</div></div><span class="crm-pill ${c.status}">${SL[c.status]}</span></div>${sigHtml(s)}
-<div class="crm-acts">${c.phone ? `<a class="crm-a go" href="${tel(c.phone)}">📞 ${esc(c.phone)}</a>` : ''}<button class="crm-a" data-open="${esc(c.key)}">Details</button>${c.pack_url ? `<a class="crm-a" href="${esc(c.pack_url)}?from=floor" target="_blank" rel="noopener">Pack</a>` : ''}</div></div>`).join('');
-    body.querySelectorAll('[data-open]').forEach(b => b.onclick = () => { open = 'all'; filt = 'all'; expanded = b.dataset.open; showAdmin() });
+    body.querySelectorAll('tr[data-open]').forEach(r => r.onclick = () => openDetail(r.dataset.open));
   }
   const unsent = c => data.outreach.find(o => o.company_key === c.key && o.status !== 'sent');
   const toReach = c => ['found', 'pack_ready', 'approved'].includes(c.status) && !!c.pack_url && !data.outreach.some(o => o.company_key === c.key && o.status === 'sent');
+  const live = () => data.companies.filter(c => c.key !== 'test-tal');
+  function followUps(hot) {
+    return live().filter(c => ['sent', 'opened'].includes(c.status) && !hot.has(c.key)).map(c => {
+      const o = data.outreach.filter(x => x.company_key === c.key && x.status === 'sent' && x.sent_at).sort((a, b) => b.sent_at.localeCompare(a.sent_at))[0];
+      return { c, o, days: o ? Math.floor((Date.now() - new Date(o.sent_at)) / 864e5) : 0 };
+    }).filter(x => x.o && x.days >= 3 && !(x.c.follow_up && x.c.follow_up > new Date().toISOString().slice(0, 10))).sort((a, b) => b.days - a.days);
+  }
+  function todo() {
+    const calls = callList().filter(x => x.c.key !== 'test-tal'), hot = new Set(calls.map(x => x.c.key));
+    const email = live().filter(c => toReach(c) && c.email && !hot.has(c.key)), text = live().filter(c => toReach(c) && !c.email && !hot.has(c.key));
+    const fu = followUps(hot);
+    return { calls, email, text, fu, total: calls.length + email.length + text.length + fu.length };
+  }
+  function head(c, extra) {
+    return `<div class="crm-row"><div><h3>${esc(c.name)}</h3><div class="crm-sub">${esc(c.city || '')}${c.rating ? ` · ${c.rating}★ (${c.reviews || 0})` : ''}${extra || ''}</div></div><span class="crm-pill ${c.status}">${SL[c.status]}</span></div>`;
+  }
+  const more = c => `<button class="crm-a" data-open="${esc(c.key)}">Details ›</button>${c.pack_url ? `<a class="crm-a" href="${esc(c.pack_url)}?from=floor" target="_blank" rel="noopener">Pack</a>` : ''}`;
+  function emailCard(c) {
+    const o = unsent(c);
+    if (!o) return `<div class="crm-card">${head(c)}<p class="crm-note">No message written yet. Ask Claude for one.</p><div class="crm-acts">${more(c)}</div></div>`;
+    const to = o.to_address && o.channel === 'email' ? o.to_address : c.email;
+    return `<div class="crm-card">${head(c)}<div class="crm-send"><div class="crm-sendh">📧 ${esc(to)}</div>
+<input type="hidden" data-to="${o.id}" value="${esc(to)}"><div class="crm-ctr"><span>Subject</span><input type="text" data-subj="${o.id}" value="${esc(o.subject || 'quick thing about your website')}"></div>
+<details><summary>Read the message</summary><div class="crm-msg">${esc(fill(o.body))}</div></details>
+<div class="crm-acts"><button class="crm-a pri" data-send="${o.id}">Approve & send</button>${more(c)}</div></div></div>`;
+  }
+  function textCard(c) {
+    const o = unsent(c);
+    return `<div class="crm-card">${head(c, c.phone ? ' · 📱 ' + esc(c.phone) : ' · <span style="color:#b45309">no number yet</span>')}<div class="crm-send">
+${o ? `<details><summary>Read the message</summary><div class="crm-msg">${esc(fill(o.body))}</div></details>` : '<p class="crm-note" style="margin:0">No message written yet.</p>'}
+<div class="crm-acts">${c.phone ? `<a class="crm-a go" href="${sms(c.phone, o ? fill(o.body) : '')}">💬 Text it</a><a class="crm-a" href="${tel(c.phone)}">📞 Call</a>` : `<button class="crm-a" data-open="${esc(c.key)}">Add a number or email</button>`}${o ? `<button class="crm-a" data-mark="${o.id}">✅ Done, I texted</button>` : ''}${more(c)}</div></div></div>`;
+  }
+  function callCard({ c, s, due }) {
+    return `<div class="crm-card">${head(c, due ? ` · <b style="color:#c2410c">follow-up due ${esc(c.follow_up)}</b>` : '')}${sigHtml(s)}
+<div class="crm-acts">${c.phone ? `<a class="crm-a go" href="${tel(c.phone)}">📞 Call ${esc(c.phone)}</a>` : ''}${more(c)}</div></div>`;
+  }
+  function fuCard({ c, o, days }) {
+    return `<div class="crm-card">${head(c, ` · ${o.channel === 'email' ? 'emailed' : 'texted'} ${days} days ago${o.sent_by_name ? ' by ' + esc(o.sent_by_name) : ''}`)}
+<p class="crm-note">No reply or views yet. A quick call or a short “just checking you saw this” usually does it.</p>
+<div class="crm-acts">${c.phone ? `<a class="crm-a go" href="${tel(c.phone)}">📞 Call</a><a class="crm-a" href="${sms(c.phone, 'Hi, ' + (me.name || 'Tom') + ' again. Just checking you saw the website I made for you: ' + (c.pack_url || '').replace(/^https?:\/\//, '').replace(/\/$/, '') + ' Happy to answer any questions.')}">💬 Text a nudge</a>` : ''}<button class="crm-a" data-snooze="${esc(c.key)}">Remind me in 3 days</button>${more(c)}</div></div>`;
+  }
+  function renderTodo(body, t) {
+    const sec = (title, note, items, fn) => `<section class="crm-sec"><h3>${title} <span>${items.length}</span></h3>${items.length ? `<p class="crm-note">${note}</p>${items.map(fn).join('')}` : `<p class="crm-done">✓ Nothing here right now</p>`}</section>`;
+    body.innerHTML = (t.total ? '' : `<div class="crm-card crm-empty">You’re all caught up. Queue a <b>New run</b> to find more companies.</div>`) +
+      sec('🔥 Call now', 'They opened the pack, tapped Call or have a follow-up due. Strike while it’s warm.', t.calls, callCard) +
+      sec('📧 Send the email', 'Check the subject, tap Approve & send, then tap again to confirm. They drop off this list once sent.', t.email, emailCard) +
+      sec('💬 Send the text', 'No email for these. “Text it” opens your phone with the message ready. Send it, then tap “Done, I texted”.', t.text, textCard) +
+      sec('⏰ Follow up', 'Reached out 3+ days ago and haven’t heard back.', t.fu, fuCard);
+    wire(body);
+  }
   const GROUPS = [
-    ['email', '📧 Ready to email', c => toReach(c) && !!c.email, 'Have an email address. Check the message and send it from here with two taps.'],
-    ['text', '💬 Text or call', c => toReach(c) && !c.email, 'No email found, only a number. Text them the message from your phone or call, then tap “Mark as texted”. If you find an email, add it and they move to Ready to email.'],
-    ['waiting', '⏳ Waiting on them', c => ['sent', 'opened'].includes(c.status) || (['found', 'pack_ready', 'approved'].includes(c.status) && !toReach(c) && !!c.pack_url), 'Contacted, no reply yet. Follow up in a few days, or call anyone who shows up in the Call list.'],
-    ['hot', '🔥 Interested', c => ['viewed', 'called', 'replied', 'meeting'].includes(c.status), 'Viewed their pack, talked to you, or booked a meeting. Call these first.'],
-    ['won', '🏆 Won', c => c.status === 'won', ''],
-    ['closed', 'Not pursued', c => ['lost', 'do_not_contact'].includes(c.status) || (c.status === 'found' && !c.pack_url), 'Lost, asked not to be contacted, or never got a pack.'],
-    ['all', 'All', c => true, ''],
+    ['active', 'Still working', c => !['won', 'lost', 'do_not_contact'].includes(c.status) && !!c.pack_url],
+    ['reach', 'Not contacted yet', c => toReach(c)],
+    ['waiting', 'Contacted, waiting', c => ['sent', 'opened'].includes(c.status)],
+    ['hot', 'Interested', c => ['viewed', 'called', 'replied', 'meeting'].includes(c.status)],
+    ['won', 'Won', c => c.status === 'won'],
+    ['closed', 'Lost / no pack', c => ['lost', 'do_not_contact'].includes(c.status) || !c.pack_url],
+    ['all', 'Everyone', c => true],
   ];
   function renderAll(body) {
     const g = GROUPS.find(x => x[0] === filt) || GROUPS[0];
-    const base = data.companies.filter(c => c.key !== 'test-tal' && (!city || c.city === city));
-    const cities = [...new Set(data.companies.map(c => c.city).filter(Boolean))].sort();
-    const match = c => !q || (c.name + ' ' + (c.city || '') + ' ' + (c.industry || '')).toLowerCase().includes(q.toLowerCase());
+    const base = live().filter(c => !city || c.city === city);
+    const cities = [...new Set(live().map(c => c.city).filter(Boolean))].sort();
+    const match = c => !q || (c.name + ' ' + (c.city || '') + ' ' + (c.industry || '') + ' ' + (c.email || '') + ' ' + (c.phone || '')).toLowerCase().includes(q.toLowerCase());
     const list = base.filter(g[2]).filter(match);
-    body.innerHTML = `<div class="crm-filter">${GROUPS.map(([k, l, f]) => `<button class="crm-tab" data-f="${k}" aria-selected="${k === g[0]}">${l} · ${base.filter(f).length}</button>`).join('')}</div>
-<div class="crm-tools"><input type="search" id="crmQ" placeholder="Search by name" value="${esc(q)}"><select id="crmCity"><option value="">All cities</option>${cities.map(x => `<option ${x === city ? 'selected' : ''}>${esc(x)}</option>`).join('')}</select></div>
-${g[3] ? `<p class="crm-note" style="margin:0 0 10px">${g[3]}</p>` : ''}` +
-      (list.length ? list.map(c => card(c, g[0])).join('') : `<div class="crm-card crm-empty">${g[0] === 'email' ? 'Nobody waiting for an email right now.' : g[0] === 'text' ? 'Nobody waiting for a text right now.' : 'No companies here yet.'}</div>`);
-    body.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { filt = b.dataset.f; expanded = null; renderAll(body) });
-    body.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { expanded = expanded === b.dataset.x ? null : b.dataset.x; renderAll(body) });
-    const qi = body.querySelector('#crmQ'); qi.oninput = () => { q = qi.value; const p = qi.selectionStart; renderAll(body); const n = body.querySelector('#crmQ'); n.focus(); n.setSelectionRange(p, p) };
+    body.innerHTML = `<div class="crm-tools"><input type="search" id="crmSearch" placeholder="Search name, email or number" value="${esc(q)}">
+<select id="crmStage" aria-label="Stage">${GROUPS.map(([k, l, f]) => `<option value="${k}" ${k === g[0] ? 'selected' : ''}>${l} (${base.filter(f).length})</option>`).join('')}</select>
+<select id="crmCity" aria-label="City"><option value="">All cities</option>${cities.map(x => `<option ${x === city ? 'selected' : ''}>${esc(x)}</option>`).join('')}</select></div>` +
+      (list.length ? `<div class="crm-list">${list.map(c => `<button class="crm-li" data-open="${esc(c.key)}"><span class="nm"><b>${esc(c.name)}</b><small>${esc(c.city || '')} · ${c.email ? '📧' : ''}${c.phone ? '📱' : ''}${!c.email && !c.phone ? 'no contact info' : ''}</small></span><span class="crm-pill ${c.status}">${SL[c.status]}</span><i aria-hidden="true">›</i></button>`).join('')}</div>` : '<div class="crm-card crm-empty">No companies match.</div>');
+    const si = body.querySelector('#crmSearch'); si.oninput = () => { q = si.value; const p = si.selectionStart; renderAll(body); const n = body.querySelector('#crmSearch'); n.focus(); n.setSelectionRange(p, p) };
+    body.querySelector('#crmStage').onchange = e => { filt = e.target.value; renderAll(body) };
     body.querySelector('#crmCity').onchange = e => { city = e.target.value; renderAll(body) };
     wire(body);
-    if (expanded) { const el = body.querySelector(`[data-card="${CSS.escape(expanded)}"]`); el && el.scrollIntoView({ block: 'start' }) }
   }
-  function quick(c, grp) {
-    const o = unsent(c); if (!o || !toReach(c)) return '';
-    if (grp === 'email' && c.email) return `<div class="crm-send crm-quick"><div class="crm-sendh">📧 To ${esc(o.to_address && o.channel === 'email' ? o.to_address : c.email)}</div>
-<input type="hidden" data-to="${o.id}" value="${esc(o.to_address && o.channel === 'email' ? o.to_address : c.email)}"><div class="crm-ctr"><span>Subject</span><input type="text" data-subj="${o.id}" value="${esc(o.subject || 'quick thing about your website')}"></div>
-<details><summary>Read the message</summary><div class="crm-msg">${esc(fill(o.body))}</div></details>
-<div class="crm-acts"><button class="crm-a pri" data-send="${o.id}">Approve & send email</button></div></div>`;
-    if (grp === 'text') return `<div class="crm-send crm-quick"><details><summary>Read the message</summary><div class="crm-msg">${esc(fill(o.body))}</div></details>
-<div class="crm-acts">${c.phone ? `<a class="crm-a go" href="${sms(c.phone, fill(o.body))}">💬 Text it from my phone</a><a class="crm-a" href="${tel(c.phone)}">📞 Call</a>` : '<span class="crm-note">No number either: open the card to add one.</span>'}<button class="crm-a" data-copy="${o.id}">Copy</button><button class="crm-a" data-mark="${o.id}">✅ Mark as texted</button></div></div>`;
-    return '';
+  function renderDetail(body) {
+    const c = data.companies.find(x => x.key === detail);
+    body.innerHTML = card(c); wire(body);
   }
-  function card(c, grp) {
-    const s = signals(c.key), ex = expanded === c.key, drafts = data.outreach.filter(o => o.company_key === c.key);
-    let h = `<div class="crm-card" data-card="${esc(c.key)}"><div class="crm-row"><div><h3>${esc(c.name)}</h3><div class="crm-sub">${esc(c.industry || '')} · ${esc(c.city || '')}${c.rating ? ` · ${c.rating}★ (${c.reviews || 0})` : ''}${c.updated_by_name ? ` · last touched by ${esc(c.updated_by_name)}` : ''}</div></div><span class="crm-pill ${c.status}">${SL[c.status]}</span></div>${sigHtml(s)}
-<div class="crm-sub" style="margin-top:4px">${c.email ? '📧 ' + esc(c.email) : '<span style="color:#b45309">No email</span>'}${c.phone ? ' · 📱 ' + esc(c.phone) : ''}</div>${ex ? '' : quick(c, grp)}
-<div class="crm-acts">${c.phone && grp !== 'text' ? `<a class="crm-a go" href="${tel(c.phone)}">📞 Call</a>` : ''}${c.pack_url ? `<a class="crm-a" href="${esc(c.pack_url)}?from=floor" target="_blank" rel="noopener">Pack</a>` : ''}<button class="crm-a" data-x="${esc(c.key)}" aria-expanded="${ex}">${ex ? 'Close' : 'Open'}</button></div>`;
-    if (ex) {
+  function card(c) {
+    const s = signals(c.key), drafts = data.outreach.filter(o => o.company_key === c.key);
+    let h = `<div class="crm-card" data-card="${esc(c.key)}"><div class="crm-row"><div><h3 style="font-size:19px">${esc(c.name)}</h3><div class="crm-sub">${esc(c.industry || '')} · ${esc(c.city || '')}${c.rating ? ` · ${c.rating}★ (${c.reviews || 0})` : ''}${c.updated_by_name ? ` · last touched by ${esc(c.updated_by_name)}` : ''}</div></div><span class="crm-pill ${c.status}">${SL[c.status]}</span></div>${sigHtml(s)}
+<div class="crm-acts">${c.pack_url ? `<a class="crm-a" href="${esc(c.pack_url)}?from=floor" target="_blank" rel="noopener">Open their pack</a>` : ''}</div>`;
       h += `<div class="crm-f"><label>Contact</label><div class="crm-ct">
 <div class="crm-ctr"><span>📧</span><input type="email" data-email="${esc(c.key)}" value="${esc(c.email || '')}" placeholder="No email yet: type the best one"><button class="crm-a" data-saveemail="${esc(c.key)}">Save</button></div>
 <div class="crm-ctr"><span>📱</span><input type="tel" data-phone="${esc(c.key)}" value="${esc(c.phone || '')}" placeholder="Best number"><button class="crm-a" data-savephone="${esc(c.key)}">Save</button></div>
@@ -292,7 +355,6 @@ ${sent ? '' : `<div class="crm-send"><div class="crm-sendh">📧 Email it</div>
 <div class="crm-f"><label for="fu-${esc(c.key)}">Follow up on</label><input type="date" id="fu-${esc(c.key)}" data-fu="${esc(c.key)}" value="${esc(c.follow_up || '')}"></div>
 <div class="crm-f"><label for="nt-${esc(c.key)}">Notes</label><textarea id="nt-${esc(c.key)}" data-notes="${esc(c.key)}" placeholder="Call notes, who you spoke to, what they said">${esc(c.notes || '')}</textarea><div class="crm-acts"><button class="crm-a" data-save="${esc(c.key)}">Save notes</button></div></div>`;
       if (s.ev.length) h += `<div class="crm-f"><label>Activity</label><ul class="crm-tl">${s.ev.slice(0, 25).map(e => `<li><span>${({ pack_view: '👀 Viewed the ' + ((e.meta || {}).page === 'mock' ? 'homepage preview' : 'pack'), pack_time: '⏱ Spent ' + ((e.meta || {}).seconds || 0) + ' s on the ' + ((e.meta || {}).page === 'mock' ? 'preview' : 'pack'), call_click: '📞 Tapped a Call button', reply_click: '✉️ Tapped an email/text link', cta_click: '🖱 Opened the homepage preview', email_sent: '📤 Email sent', email_delivered: '📬 Email delivered', email_open: '✉️ Opened the email', email_click: '🔗 Clicked a link in the email', email_bounce: '⚠️ Email bounced', email_reply: '💬 Replied', note: '📝 ' + esc((e.meta || {}).text || 'Note'), status_change: '🔀 ' + esc((e.meta || {}).text || 'Status changed') })[e.type] || esc(e.type)}${e.actor_name ? ` <b>· ${esc(e.actor_name)}</b>` : ''}</span><small>${ago(e.created_at)}</small></li>`).join('')}</ul></div>`;
-    }
     return h + '</div>';
   }
   async function upd(key, patch, msg, logText) {
@@ -303,7 +365,9 @@ ${sent ? '' : `<div class="crm-send"><div class="crm-sendh">📧 Email it</div>
     return true;
   }
   function wire(body) {
-    body.querySelectorAll('[data-status]').forEach(s => s.onchange = () => upd(s.dataset.status, { status: s.value }, 'Status saved', ['status_change', 'Status changed to ' + SL[s.value]]));
+    body.querySelectorAll('[data-open]').forEach(b => b.onclick = () => openDetail(b.dataset.open));
+    body.querySelectorAll('[data-snooze]').forEach(b => b.onclick = async () => { const d = new Date(Date.now() + 3 * 864e5).toISOString().slice(0, 10); await upd(b.dataset.snooze, { follow_up: d }, 'Back on your list on ' + d, ['note', 'Follow-up set for ' + d]); refresh() });
+    body.querySelectorAll('[data-status]').forEach(s => s.onchange = () => upd(s.dataset.status, { status: s.value }, 'Status saved', ['status_change', 'Status changed to ' + SL[s.value]]).then(refresh));
     body.querySelectorAll('[data-fu]').forEach(s => s.onchange = () => upd(s.dataset.fu, { follow_up: s.value || null }, s.value ? 'Follow-up set' : 'Follow-up cleared', ['note', s.value ? 'Follow-up set for ' + s.value : 'Follow-up cleared']));
     body.querySelectorAll('[data-save]').forEach(b => b.onclick = () => upd(b.dataset.save, { notes: body.querySelector(`[data-notes="${CSS.escape(b.dataset.save)}"]`).value }, 'Notes saved', ['note', 'Updated the notes']));
     body.querySelectorAll('[data-copy]').forEach(b => b.onclick = async () => { const o = data.outreach.find(x => x.id == b.dataset.copy); try { await navigator.clipboard.writeText((o.subject ? 'Subject: ' + o.subject + '\n\n' : '') + fill(o.body)); toast('Copied') } catch (e) { toast('Select the text and copy it') } });
@@ -312,10 +376,10 @@ ${sent ? '' : `<div class="crm-send"><div class="crm-sendh">📧 Email it</div>
       const r = await sb.from('outreach').update({ status: 'sent', sent_at: now, approved_at: now, sent_by: session.user.id, sent_by_name: me.name }).eq('id', o.id); if (r.error) return toast(r.error.message);
       await sb.from('events').insert({ company_key: o.company_key, type: 'note', actor_id: session.user.id, actor_name: me.name, meta: { text: (o.channel === 'text' ? 'Text' : o.channel === 'form' ? 'Contact-form message' : 'Message') + ' sent' } });
       const c = data.companies.find(x => x.key === o.company_key); if (['found', 'pack_ready', 'approved'].includes(c.status)) await upd(c.key, { status: 'sent' });
-      toast('Marked as sent'); showAdmin();
+      toast('Marked as sent'); refresh();
     });
-    body.querySelectorAll('[data-saveemail]').forEach(b => b.onclick = () => { const v = body.querySelector(`[data-email="${CSS.escape(b.dataset.saveemail)}"]`).value.trim(); upd(b.dataset.saveemail, { email: v || null }, 'Email saved', ['note', v ? 'Email set to ' + v : 'Email cleared']).then(() => showAdmin()) });
-    body.querySelectorAll('[data-savephone]').forEach(b => b.onclick = () => { const v = body.querySelector(`[data-phone="${CSS.escape(b.dataset.savephone)}"]`).value.trim(); upd(b.dataset.savephone, { phone: v || null }, 'Number saved', ['note', v ? 'Number set to ' + v : 'Number cleared']).then(() => showAdmin()) });
+    body.querySelectorAll('[data-saveemail]').forEach(b => b.onclick = () => { const v = body.querySelector(`[data-email="${CSS.escape(b.dataset.saveemail)}"]`).value.trim(); upd(b.dataset.saveemail, { email: v || null }, 'Email saved', ['note', v ? 'Email set to ' + v : 'Email cleared']).then(refresh) });
+    body.querySelectorAll('[data-savephone]').forEach(b => b.onclick = () => { const v = body.querySelector(`[data-phone="${CSS.escape(b.dataset.savephone)}"]`).value.trim(); upd(b.dataset.savephone, { phone: v || null }, 'Number saved', ['note', v ? 'Number set to ' + v : 'Number cleared']).then(refresh) });
     body.querySelectorAll('[data-send]').forEach(b => b.onclick = async () => {
       const o = data.outreach.find(x => x.id == b.dataset.send);
       const to = body.querySelector(`[data-to="${o.id}"]`).value.trim(), subj = body.querySelector(`[data-subj="${o.id}"]`).value.trim();
@@ -327,7 +391,7 @@ ${sent ? '' : `<div class="crm-send"><div class="crm-sendh">📧 Email it</div>
       const c = data.companies.find(x => x.key === o.company_key); if (c && !c.email) await upd(c.key, { email: to });
       const r = await sb.functions.invoke('send-outreach', { body: { outreach_id: o.id } });
       if (r.error || (r.data && r.data.error)) { b.disabled = false; b.textContent = 'Approve & send email'; let m = r.data && r.data.error; if (!m && r.error && r.error.context) { try { m = (await r.error.context.json()).error } catch (e) {} } return toast(m || 'Couldn’t send') }
-      toast('Sent'); showAdmin();
+      toast('Sent'); refresh();
     });
   }
   function confirmInline(b, q) { if (b.dataset.armed) return true; b.dataset.armed = '1'; const t = b.textContent; b.textContent = '✅ ' + q + ' Tap again to send'; b.style.background = '#14b8a6'; b.style.borderColor = '#14b8a6'; toast('Tap the green button again to send'); setTimeout(() => { delete b.dataset.armed; if (!b.disabled) { b.textContent = t; b.style.background = ''; b.style.borderColor = '' } }, 12000); return false }
@@ -338,7 +402,7 @@ ${sent ? '' : `<div class="crm-send"><div class="crm-sendh">📧 Email it</div>
       (data.requests.length ? `<div class="crm-card"><h3 style="margin:0 0 6px">Queue</h3><ul class="crm-tl">${data.requests.map(r => `<li><span><b>${esc(r.industry)}</b> · ${esc(r.city)}${r.notes ? ' · ' + esc(r.notes) : ''}</span><small>${esc(r.status)} · ${ago(r.created_at)}</small></li>`).join('')}</ul></div>` : '');
     $('crmQ').onsubmit = async e => {
       e.preventDefault(); const r = await sb.from('run_requests').insert({ city: $('qCity').value.trim(), industry: $('qInd').value.trim(), notes: $('qNote').value.trim() || null });
-      if (r.error) return toast(r.error.message); toast('Run queued'); showAdmin();
+      if (r.error) return toast(r.error.message); toast('Run queued'); refresh();
     };
   }
 
