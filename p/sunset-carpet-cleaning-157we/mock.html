@@ -42,4 +42,11 @@ section{padding:80px 0} h2{font-family:var(--d);font-weight:800;font-size:46px;l
 <section style="padding-top:0"><div class="w"><div class="req"><div><h2>Request a cleaning, any time.</h2><p>Send it tonight and we’ll call you back in the morning.</p><span class="hrs"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Mon–Fri, 8am–5pm</span></div>
 <div class="form"><span>Your name</span><span>Phone</span><span>Rooms or furniture to clean</span><span class="s">Send request</span></div></div></div></section>
 <div class="foot">Sunset Carpet Cleaning · Mesa, AZ</div>
-<div class="mbar"><span class="a">Call</span><span class="b2">Request a cleaning</span></div></body></html>
+<div class="mbar"><span class="a">Call</span><span class="b2">Request a cleaning</span></div><script>(function(){var U='https://qmuexcdukoqwyvdvplbt.supabase.co/rest/v1/events',K='sb_publishable_nxnT9XoFom10WSD3Qb6OFQ_oxUdBv70',slug=location.pathname.split('/p/')[1];if(!slug)return;slug=slug.split('/')[0];
+try{if(/[?&]from=floor/.test(location.search))localStorage.setItem('24hw_me','1');if(localStorage.getItem('24hw_me'))return}catch(e){}
+function send(type,meta){try{fetch(U,{method:'POST',keepalive:true,headers:{apikey:K,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({type:type,pack_slug:slug,meta:meta||{}})})}catch(e){}}
+var t0=Date.now(),page=location.pathname.indexOf('mock.html')>-1?'mock':'pack';send('pack_view',{page:page,ref:document.referrer||null,w:innerWidth});
+var sent=false;function bye(){if(sent)return;sent=true;send('pack_time',{page:page,seconds:Math.round((Date.now()-t0)/1000)})}
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')bye()});addEventListener('pagehide',bye);
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a');if(!a)return;var h=a.getAttribute('href')||'';
+if(h.indexOf('tel:')===0)send('call_click',{page:page});else if(h.indexOf('mailto:')===0||h.indexOf('sms:')===0)send('reply_click',{page:page});else if(/mock\.html/.test(h))send('cta_click',{page:page,what:'mockup'})},true)})();</script></body></html>

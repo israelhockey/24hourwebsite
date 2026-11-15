@@ -50,4 +50,11 @@ section{padding:80px 0} h2{font-family:var(--d);font-weight:600;font-size:48px;l
 <div class="tags"><span>Sofas & sectionals</span><span>Recliners</span><span>Dining chairs</span><span>Pet odor</span></div></div></div></div></section>
 <section style="padding-top:0"><div class="w"><h2>Twenty years, one standard.</h2><div class="tl"><div><b>2005</b><span>Five Star starts cleaning East Valley carpets.</span></div><div><b>20 yrs</b><span>Homes, vacation rentals and restoration jobs.</span></div><div><b>Today</b><span>4.9 stars on Google and #2 for upholstery in Mesa.</span></div></div></div></section>
 <div class="foot"><div class="w"><div><h2>3 rooms for $99.</h2><p class="one">Hallway free. Serving Mesa and the East Valley.</p></div><div class="cta">Call (480) 709-2006</div></div></div>
-<div class="mbar"><span class="a">Call</span><span class="b2">Book the $99 deal</span></div></body></html>
+<div class="mbar"><span class="a">Call</span><span class="b2">Book the $99 deal</span></div><script>(function(){var U='https://qmuexcdukoqwyvdvplbt.supabase.co/rest/v1/events',K='sb_publishable_nxnT9XoFom10WSD3Qb6OFQ_oxUdBv70',slug=location.pathname.split('/p/')[1];if(!slug)return;slug=slug.split('/')[0];
+try{if(/[?&]from=floor/.test(location.search))localStorage.setItem('24hw_me','1');if(localStorage.getItem('24hw_me'))return}catch(e){}
+function send(type,meta){try{fetch(U,{method:'POST',keepalive:true,headers:{apikey:K,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({type:type,pack_slug:slug,meta:meta||{}})})}catch(e){}}
+var t0=Date.now(),page=location.pathname.indexOf('mock.html')>-1?'mock':'pack';send('pack_view',{page:page,ref:document.referrer||null,w:innerWidth});
+var sent=false;function bye(){if(sent)return;sent=true;send('pack_time',{page:page,seconds:Math.round((Date.now()-t0)/1000)})}
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')bye()});addEventListener('pagehide',bye);
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a');if(!a)return;var h=a.getAttribute('href')||'';
+if(h.indexOf('tel:')===0)send('call_click',{page:page});else if(h.indexOf('mailto:')===0||h.indexOf('sms:')===0)send('reply_click',{page:page});else if(/mock\.html/.test(h))send('cta_click',{page:page,what:'mockup'})},true)})();</script></body></html>
