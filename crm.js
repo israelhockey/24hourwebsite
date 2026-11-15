@@ -44,7 +44,7 @@
 .crm-filter{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
 .crm-toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--fg);color:#fff;padding:10px 16px;border-radius:999px;font-weight:700;z-index:70}
 .crm-note{font-size:12.5px;color:var(--muted);margin-top:6px}
-@media (max-width:720px){.crm-btn span.t{display:none}}`;
+`;
   document.head.appendChild(css);
 
   // ---------------------------------------------------------------- toolbar
@@ -54,7 +54,7 @@
 <button class="crm-btn" id="crmPipe" type="button" hidden>🗂️ <span class="t">Pipeline</span></button>
 <button class="crm-btn pri" id="crmQueue" type="button" hidden>➕ <span class="t">Queue run</span></button>
 <button class="crm-btn" id="crmSign" type="button">🔑 <span class="t">Sign in</span></button>`;
-  bar.appendChild(box);
+  const pill = bar.querySelector('.pillbar'); pill ? pill.after(box) : bar.prepend(box);
   const $ = id => document.getElementById(id);
   let session = null, isAdmin = false, data = { companies: [], events: [], outreach: [], requests: [] }, open = null, filt = 'active', expanded = null;
 
