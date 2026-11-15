@@ -628,7 +628,7 @@ renderAll();
 const get=async q=>{const r=await fetch(SB+q,{headers:H,cache:'no-store'});if(!r.ok)throw new Error(r.status);return r.json()};
 const load=async()=>{try{const [rs,cs,acts]=await Promise.all([get('runs?select=*&order=started_at.desc&limit=50'),get('floor_companies?select=*&order=position.asc'),get('activity?select=run_id,company_key,station,status,message,created_at&order=created_at.asc&limit=5000')]);
  const list=rs.map(r=>({id:r.id,title:r.title,city:r.city,niche:r.niche,note:r.note,status:r.status,startedAt:r.started_at,decisions:r.decisions||{},
-  businesses:cs.filter(c=>c.run_id===r.id).map(c=>({id:c.key,name:c.name,short:c.short,detail:c.detail,packUrl:c.pack_url?(c.pack_url+(c.pack_url.indexOf('github.io')>-1?'?from=floor':'')):null,crm:c.status})),
+  businesses:cs.filter(c=>c.run_id===r.id).map(c=>({id:c.key,name:c.name,short:c.short,detail:c.detail,packUrl:c.pack_url?(c.pack_url+(/github\.io|simplyailive\.com/.test(c.pack_url)?'?from=floor':'')):null,crm:c.status})),
   log:acts.filter(a=>a.run_id===r.id).map(a=>({t:a.created_at,s:a.station,b:a.company_key,st:a.status,m:a.message}))}));
  window.__applyRuns(list);setLive('live')}catch(e){try{const r=await fetch('data/runs.json?t='+Date.now(),{cache:'no-store'});window.__applyRuns(await r.json());setLive('stale')}catch(e2){setLive('off')}}};
 await load();setInterval(load,15000);return}
@@ -639,4 +639,4 @@ await load();setInterval(load,15000);return}
     window.__applyRuns(snap.docs.map(x=>({id:x.id,...x.data()})))},()=>{clearTimeout(timer);setLive('off')})}catch(e){setLive('off')}})();
 })();
 </script>
-<script src="vendor/supabase.js"></script><script>window.__SB_URL='https://qmuexcdukoqwyvdvplbt.supabase.co';window.__SB_KEY='sb_publishable_nxnT9XoFom10WSD3Qb6OFQ_oxUdBv70'</script><script src="crm.js?v=6eafe43c"></script></body></html>
+<script src="vendor/supabase.js"></script><script>window.__SB_URL='https://qmuexcdukoqwyvdvplbt.supabase.co';window.__SB_KEY='sb_publishable_nxnT9XoFom10WSD3Qb6OFQ_oxUdBv70'</script><script src="crm.js?v=a418e89b"></script></body></html>

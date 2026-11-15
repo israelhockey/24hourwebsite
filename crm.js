@@ -172,7 +172,7 @@
   function card(c) {
     const s = signals(c.key), ex = expanded === c.key, drafts = data.outreach.filter(o => o.company_key === c.key);
     let h = `<div class="crm-card" data-card="${esc(c.key)}"><div class="crm-row"><div><h3>${esc(c.name)}</h3><div class="crm-sub">${esc(c.industry || '')} · ${esc(c.city || '')}${c.rating ? ` · ${c.rating}★ (${c.reviews || 0})` : ''}</div></div><span class="crm-pill ${c.status}">${SL[c.status]}</span></div>${sigHtml(s)}
-<div class="crm-acts">${c.phone ? `<a class="crm-a go" href="${tel(c.phone)}">📞 Call</a>` : ''}${c.pack_url ? `<a class="crm-a" href="${esc(c.pack_url)}${c.pack_url.indexOf('github.io') > -1 ? '?from=floor' : ''}" target="_blank" rel="noopener">Pack</a>` : ''}<button class="crm-a" data-x="${esc(c.key)}" aria-expanded="${ex}">${ex ? 'Close' : 'Open'}</button></div>`;
+<div class="crm-acts">${c.phone ? `<a class="crm-a go" href="${tel(c.phone)}">📞 Call</a>` : ''}${c.pack_url ? `<a class="crm-a" href="${esc(c.pack_url)}?from=floor" target="_blank" rel="noopener">Pack</a>` : ''}<button class="crm-a" data-x="${esc(c.key)}" aria-expanded="${ex}">${ex ? 'Close' : 'Open'}</button></div>`;
     if (ex) {
       h += `<div class="crm-f"><label>How to reach them</label><div class="crm-sub" style="font-size:13px;color:var(--fg)">${esc(c.contact_note || 'No notes yet.')}${c.email ? `<br>Email: <a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : ''}${c.website ? `<br>Website: ${esc(c.website)}` : ''}</div></div>
 <div class="crm-f"><label for="st-${esc(c.key)}">Status</label><select id="st-${esc(c.key)}" data-status="${esc(c.key)}">${STATUSES.map(([k, l]) => `<option value="${k}" ${k === c.status ? 'selected' : ''}>${l}</option>`).join('')}</select></div>

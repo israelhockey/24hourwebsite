@@ -2,5 +2,5 @@
 
 Agency floor (live dashboard) and prospect packs.
 
-- Floor: https://israelhockey.github.io/24hourwebsite/
+- Floor: https://go.simplyailive.com/
 - Packs: `/p/<company>-<code>/` (one public page per company, hidden from search engines)
