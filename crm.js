@@ -308,7 +308,7 @@ ${o ? `<details><summary>Read the message</summary><div class="crm-msg">${esc(fi
     const sec = (title, note, items, fn) => `<section class="crm-sec"><h3>${title} <span>${items.length}</span></h3>${items.length ? `<p class="crm-note">${note}</p>${items.map(fn).join('')}` : `<p class="crm-done">✓ Nothing here right now</p>`}</section>`;
     body.innerHTML = (t.total ? '' : `<div class="crm-card crm-empty">You’re all caught up. Queue a <b>New run</b> to find more companies.</div>`) +
       sec('🔥 Call now', 'They opened the pack, tapped Call or have a follow-up due. Strike while it’s warm.', t.calls, callCard) +
-      sec('📧 Send the email', 'Check the subject, tap Approve & send, then tap again to confirm. They drop off this list once sent.', t.email, emailCard) +
+      sec('📧 Send the email', 'Check the subject, tap Approve & send, then tap again to confirm. They drop off this list once sent.' + (sendable(t.email).length > 1 ? `<span class="crm-acts" style="display:flex;margin-top:8px"><button class="crm-a pri" id="crmSendAll">Send all ${sendable(t.email).length}</button></span>` : ''), t.email, emailCard) +
       sec('💬 Send the text', 'No email for these. “Text it” opens your phone with the message ready. Send it, then tap “Done, I texted”.', t.text, textCard) +
       sec('⏰ Follow up', 'Reached out 3+ days ago and haven’t heard back.', t.fu, fuCard);
     wire(body);
@@ -400,6 +400,7 @@ ${sent ? '' : `<div class="crm-send"><div class="crm-sendh">📧 Email it</div>
     });
     body.querySelectorAll('[data-saveemail]').forEach(b => b.onclick = () => { const v = body.querySelector(`[data-email="${CSS.escape(b.dataset.saveemail)}"]`).value.trim(); upd(b.dataset.saveemail, { email: v || null }, 'Email saved', ['note', v ? 'Email set to ' + v : 'Email cleared']).then(refresh) });
     body.querySelectorAll('[data-savephone]').forEach(b => b.onclick = () => { const v = body.querySelector(`[data-phone="${CSS.escape(b.dataset.savephone)}"]`).value.trim(); upd(b.dataset.savephone, { phone: v || null }, 'Number saved', ['note', v ? 'Number set to ' + v : 'Number cleared']).then(refresh) });
+    const sa = body.querySelector('#crmSendAll'); if (sa) sa.onclick = () => sendAll(sa, body);
     body.querySelectorAll('[data-send]').forEach(b => b.onclick = async () => {
       const o = data.outreach.find(x => x.id == b.dataset.send);
       const to = body.querySelector(`[data-to="${o.id}"]`).value.trim(), subj = body.querySelector(`[data-subj="${o.id}"]`).value.trim();
@@ -413,6 +414,22 @@ ${sent ? '' : `<div class="crm-send"><div class="crm-sendh">📧 Email it</div>
       if (r.error || (r.data && r.data.error)) { b.disabled = false; b.textContent = 'Approve & send email'; let m = r.data && r.data.error; if (!m && r.error && r.error.context) { try { m = (await r.error.context.json()).error } catch (e) {} } return toast(m || 'Couldn’t send') }
       toast('Sent'); refresh();
     });
+  }
+  function sendable(list) { return list.filter(c => { const o = unsent(c); return o && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((o.to_address || c.email || '').trim()) && !/\[[^\]]*\]/.test(o.body) }) }
+  async function sendAll(b, body) {
+    const list = sendable(todo().email); if (!list.length) return;
+    if (!confirmInline(b, `Send all ${list.length} emails?`)) return;
+    b.disabled = true; let ok = 0, bad = [];
+    for (let i = 0; i < list.length; i++) {
+      const c = list[i], o = unsent(c); b.textContent = `Sending ${i + 1} of ${list.length}…`;
+      const subjEl = body.querySelector(`[data-subj="${o.id}"]`), to = (o.to_address || c.email).trim();
+      const patch = { to_address: to, channel: 'email' }; if (subjEl && subjEl.value.trim()) patch.subject = subjEl.value.trim();
+      await sb.from('outreach').update(patch).eq('id', o.id);
+      const r = await sb.functions.invoke('send-outreach', { body: { outreach_id: o.id } });
+      if (r.error || (r.data && r.data.error)) bad.push(c.name); else ok++;
+      if (i < list.length - 1) await new Promise(res => setTimeout(res, 5000 + Math.random() * 6000)); // a few seconds apart, like sending by hand
+    }
+    toast(`Sent ${ok}` + (bad.length ? `. Didn’t send: ${bad.join(', ')}` : '')); refresh();
   }
   function confirmInline(b, q) { if (b.dataset.armed) return true; b.dataset.armed = '1'; const t = b.textContent; b.textContent = '✅ ' + q + ' Tap again to send'; b.style.background = '#14b8a6'; b.style.borderColor = '#14b8a6'; toast('Tap the green button again to send'); setTimeout(() => { delete b.dataset.armed; if (!b.disabled) { b.textContent = t; b.style.background = ''; b.style.borderColor = '' } }, 12000); return false }
   function renderQueue(body) {
