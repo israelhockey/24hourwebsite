@@ -96,19 +96,40 @@ body:not(.fv-mini) .fv-open{display:none}
         return [town.replace(/ County$/, ''), st].filter(Boolean).join(', ');
       } catch (e) { return '' }
     }
+    const INDUSTRIES = ['HVAC', 'Plumbers', 'Electricians', 'Roofers', 'House painters', 'Landscaping', 'Lawn care', 'Tree service', 'Pool service', 'Pest control',
+      'Carpet cleaning', 'House cleaning', 'Window cleaning', 'Pressure washing', 'Garage door repair', 'Handyman', 'Remodeling contractors', 'Flooring', 'Concrete contractors',
+      'Fencing', 'Pavers & hardscapes', 'Gutter installation', 'Solar installers', 'Appliance repair', 'Locksmiths', 'Movers', 'Junk removal', 'Auto repair', 'Auto detailing',
+      'Towing', 'Dentists', 'Chiropractors', 'Med spas', 'Hair salons', 'Barbers', 'Nail salons', 'Personal trainers', 'Dog groomers', 'Veterinarians', 'Restaurants', 'Bakeries',
+      'Real estate agents', 'Insurance agents', 'Accountants', 'Lawyers', 'Photographers', 'Wedding venues', 'Daycares'];
+    const used = () => [...new Set(((window.CRM && CRM.data && CRM.data.runs) || pub.runs).map(r => (r.niche || '').trim()).filter(Boolean))];
+    async function nearbyTowns(lat, lng) {
+      try {
+        const ctl = new AbortController(); setTimeout(() => ctl.abort(), 8000);
+        const r = await fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lng}&limit=20&radius=40&layer=city&lang=en`, { signal: ctl.signal });
+        const j = await r.json();
+        return [...new Set((j.features || []).map(f => f.properties.name).filter(n => n && !/administration|open space|airport|air force|base$|park$/i.test(n)))].slice(0, 14);
+      } catch (e) { return [] }
+    }
     map.on('click', async e => {
       const { lat, lng } = e.latlng;
-      const pop = L.popup({ minWidth: 230 }).setLatLng(e.latlng).setContent(`<div class="fv-pop"><b>Run this area</b><div class="s" id="fvWhere">Finding the area…</div>
-<input id="fvCity" placeholder="Area"><input id="fvInd" placeholder="Industry, e.g. roofers, plumbers" autocomplete="off"><button class="p" id="fvGo">Queue this run</button><div class="s" id="fvMsg" style="margin-top:6px"></div></div>`).openOn(map);
+      const indOpts = [...new Set([...used(), ...INDUSTRIES])];
+      const pop = L.popup({ minWidth: 250 }).setLatLng(e.latlng).setContent(`<div class="fv-pop"><b>Run this area</b><div class="s" id="fvWhere">Finding towns near here…</div>
+<select id="fvTown" style="width:100%;margin:4px 0;padding:7px 9px;border:1px solid #d5d9e6;border-radius:9px;font:inherit;font-size:13px"><option value="">Loading towns…</option></select>
+<input id="fvCity" placeholder="Area, e.g. Tempe, AZ" hidden>
+<select id="fvIndSel" style="width:100%;margin:4px 0;padding:7px 9px;border:1px solid #d5d9e6;border-radius:9px;font:inherit;font-size:13px"><option value="">Pick an industry…</option>${indOpts.map(x => `<option>${esc(x)}</option>`).join('')}<option value="__other">Other…</option></select>
+<input id="fvInd" placeholder="Type the industry" hidden autocomplete="off">
+<button class="p" id="fvGo">Queue this run</button><div class="s" id="fvMsg" style="margin-top:6px"></div></div>`).openOn(map);
+      let state = '';
       const wire = () => {
         const g = $('fvGo'); if (!g) return;
-        $('fvInd').focus();
-        $('fvInd').onkeydown = ev => { if (ev.key === 'Enter') g.click() };
+        $('fvIndSel').onchange = () => { const o = $('fvIndSel').value === '__other'; $('fvInd').hidden = !o; if (o) $('fvInd').focus() };
+        $('fvTown').onchange = () => { const o = $('fvTown').value === '__other'; $('fvCity').hidden = !o; if (o) $('fvCity').focus() };
         g.onclick = async () => {
           if (!window.CRM || !CRM.admin) { $('fvMsg').textContent = 'Sign in first, then queue it.'; CRM && CRM.signIn(); return }
-          const city = $('fvCity').value.trim(), ind = $('fvInd').value.trim();
-          if (!ind) { $('fvMsg').textContent = 'Type an industry first.'; $('fvInd').focus(); return }
-          if (!city) { $('fvMsg').textContent = 'Add the area name.'; $('fvCity').focus(); return }
+          const tv = $('fvTown').value, city = tv && tv !== '__other' ? tv : $('fvCity').value.trim();
+          const iv = $('fvIndSel').value, ind = iv && iv !== '__other' ? iv : $('fvInd').value.trim();
+          if (!city) { $('fvMsg').textContent = 'Pick a town.'; return }
+          if (!ind) { $('fvMsg').textContent = 'Pick an industry.'; return }
           g.disabled = true; g.textContent = 'Queuing…';
           const r = await CRM.sb.from('run_requests').insert({ city, industry: ind, lat, lng });
           if (r.error) { g.disabled = false; g.textContent = 'Queue this run'; $('fvMsg').textContent = 'Couldn’t queue it: ' + r.error.message; return }
@@ -118,10 +139,13 @@ body:not(.fv-mini) .fv-open{display:none}
         };
       };
       setTimeout(wire, 20);
-      const name = await placeName(lat, lng);
-      const w = $('fvWhere'), c = $('fvCity');
-      if (w) w.textContent = name ? 'Area: ' + name : `${lat.toFixed(3)}, ${lng.toFixed(3)} (type the area name)`;
-      if (c && !c.value) c.value = name;
+      const [name, towns] = await Promise.all([placeName(lat, lng), nearbyTowns(lat, lng)]);
+      state = (name.split(', ')[1] || '');
+      const sel = $('fvTown'), w = $('fvWhere'); if (!sel) return;
+      const list = [...new Set([name, ...towns.map(t => t + (state ? ', ' + state : ''))].filter(Boolean))];
+      sel.innerHTML = list.map((t, k) => `<option${k === 0 ? ' selected' : ''}>${esc(t)}</option>`).join('') + '<option value="__other">Other town…</option>';
+      if (!list.length) { sel.innerHTML = '<option value="__other" selected>Type the town</option>'; $('fvCity').hidden = false }
+      w.textContent = name ? `You clicked near ${name}. Pick a town:` : 'Pick a town:';
     });
     drawMap(true);
   }
