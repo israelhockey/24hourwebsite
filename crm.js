@@ -140,6 +140,7 @@
     ['crmStats', 'crmTodo', 'crmPipe', 'crmQueue'].forEach(id => $(id).hidden = !isAdmin);
     // mark this device as team so our own pack visits are never counted as customer views
     if (isAdmin) { try { localStorage.setItem('24hw_me', me.name || '1') } catch (e) {} await load() }
+    document.dispatchEvent(new CustomEvent('crm:auth', { detail: { admin: isAdmin } }));
   }
   $('crmSign').onclick = async () => {
     if (!session) return showSignIn('in');
@@ -154,12 +155,16 @@
 
   // ---------------------------------------------------------------- data
   async function load() {
-    const [c, e, o, q] = await Promise.all([
+    const [c, e, o, q, r, f, rc] = await Promise.all([
       sb.from('companies').select('*').order('updated_at', { ascending: false }),
-      sb.from('events').select('*').order('created_at', { ascending: false }).limit(2000),
+      sb.from('events').select('*').order('created_at', { ascending: false }).limit(4000),
       sb.from('outreach').select('*').order('created_at', { ascending: false }),
-      sb.from('run_requests').select('*').order('created_at', { ascending: false }).limit(50)]);
-    data = { companies: c.data || [], events: e.data || [], outreach: o.data || [], requests: q.data || [] };
+      sb.from('run_requests').select('*').order('created_at', { ascending: false }).limit(100),
+      sb.from('runs').select('*').order('started_at', { ascending: false }),
+      sb.from('findings').select('*').order('created_at', { ascending: false }).limit(2000),
+      sb.from('run_companies').select('run_id,company_key')]);
+    data = { companies: c.data || [], events: e.data || [], outreach: o.data || [], requests: q.data || [], runs: r.data || [], findings: f.data || [], runCompanies: rc.data || [] };
+    document.dispatchEvent(new CustomEvent('crm:data'));
     const n = todo().total; $('crmTodoN').hidden = !n; $('crmTodoN').textContent = n;
   }
   function signals(key) {
@@ -251,7 +256,7 @@ ${teamHtml(sent, ev)}<div class="crm-card"><h3 class="st-h">Pipeline</h3><div cl
     body.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { range = +b.dataset.r; renderStats(body) });
     body.querySelectorAll('tr[data-open]').forEach(r => r.onclick = () => openDetail(r.dataset.open));
   }
-  const unsent = c => data.outreach.find(o => o.company_key === c.key && o.status !== 'sent');
+  const unsent = c => data.outreach.find(o => o.company_key === c.key && o.status === 'draft' && !o.auto);
   const toReach = c => ['found', 'pack_ready', 'approved'].includes(c.status) && !!c.pack_url && !data.outreach.some(o => o.company_key === c.key && o.status === 'sent');
   const live = () => data.companies.filter(c => c.key !== 'test-tal');
   function followUps(hot) {
@@ -356,7 +361,15 @@ ${sent ? '' : `<div class="crm-send"><div class="crm-sendh">📧 Email it</div>
 <div class="crm-f"><label for="fu-${esc(c.key)}">Follow up on</label><input type="date" id="fu-${esc(c.key)}" data-fu="${esc(c.key)}" value="${esc(c.follow_up || '')}"></div>
 <div class="crm-f"><label for="nt-${esc(c.key)}">Notes</label><textarea id="nt-${esc(c.key)}" data-notes="${esc(c.key)}" placeholder="Call notes, who you spoke to, what they said">${esc(c.notes || '')}</textarea><div class="crm-acts"><button class="crm-a" data-save="${esc(c.key)}">Save notes</button></div></div>`;
       if (s.ev.length) h += `<div class="crm-f"><label>Activity</label><ul class="crm-tl">${s.ev.slice(0, 25).map(e => `<li><span>${({ pack_view: '👀 Viewed the ' + ((e.meta || {}).page === 'mock' ? 'homepage preview' : 'pack'), pack_time: '⏱ Spent ' + ((e.meta || {}).seconds || 0) + ' s on the ' + ((e.meta || {}).page === 'mock' ? 'preview' : 'pack'), call_click: '📞 Tapped a Call button', reply_click: '✉️ Tapped an email/text link', cta_click: '🖱 Opened the homepage preview', email_sent: '📤 Email sent', email_delivered: '📬 Email delivered', email_open: '✉️ Opened the email', email_click: '🔗 Clicked a link in the email', email_bounce: '⚠️ Email bounced', email_reply: '💬 Replied', note: '📝 ' + esc((e.meta || {}).text || 'Note'), status_change: '🔀 ' + esc((e.meta || {}).text || 'Status changed') })[e.type] || esc(e.type)}${e.actor_name ? ` <b>· ${esc(e.actor_name)}</b>` : ''}</span><small>${ago(e.created_at)}</small></li>`).join('')}</ul></div>`;
+    const fus = data.outreach.filter(o => o.company_key === c.key && o.auto).sort((a, b) => (a.step || 0) - (b.step || 0));
+    if (fus.length) h += `<div class="crm-f"><label>Automatic follow-ups</label>${fus.map(o => `<div class="crm-sub" style="margin:4px 0">${o.step === 2 ? '2nd email' : '3rd email'} · ${o.status === 'scheduled' ? 'scheduled for ' + new Date(o.send_after).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : esc(o.status)}</div>`).join('')}${fus.some(o => o.status === 'scheduled') ? `<div class="crm-acts"><button class="crm-a" data-stopfu="${esc(c.key)}">Stop follow-ups</button></div><p class="crm-note">They also stop on their own if you set the status to Replied, Meeting, Won, Lost or Do not contact.</p>` : ''}</div>`;
     return h + '</div>';
+  }
+  async function stopFollowups(key) {
+    const r = await sb.from('outreach').update({ status: 'cancelled' }).eq('company_key', key).eq('auto', true).eq('status', 'scheduled');
+    if (r.error) return toast(r.error.message);
+    await sb.from('events').insert({ company_key: key, type: 'note', actor_id: session.user.id, actor_name: me.name, meta: { text: 'Follow-ups stopped' } });
+    toast('Follow-ups stopped'); refresh();
   }
   async function upd(key, patch, msg, logText) {
     patch.updated_at = new Date().toISOString(); patch.updated_by_name = me.name;
@@ -367,6 +380,7 @@ ${sent ? '' : `<div class="crm-send"><div class="crm-sendh">📧 Email it</div>
   }
   function wire(body) {
     body.querySelectorAll('[data-open]').forEach(b => b.onclick = () => openDetail(b.dataset.open));
+    body.querySelectorAll('[data-stopfu]').forEach(b => b.onclick = () => stopFollowups(b.dataset.stopfu));
     body.querySelectorAll('[data-snooze]').forEach(b => b.onclick = async () => { const d = new Date(Date.now() + 3 * 864e5).toISOString().slice(0, 10); await upd(b.dataset.snooze, { follow_up: d }, 'Back on your list on ' + d, ['note', 'Follow-up set for ' + d]); refresh() });
     body.querySelectorAll('[data-status]').forEach(s => s.onchange = () => upd(s.dataset.status, { status: s.value }, 'Status saved', ['status_change', 'Status changed to ' + SL[s.value]]).then(refresh));
     body.querySelectorAll('[data-fu]').forEach(s => s.onchange = () => upd(s.dataset.fu, { follow_up: s.value || null }, s.value ? 'Follow-up set' : 'Follow-up cleared', ['note', s.value ? 'Follow-up set for ' + s.value : 'Follow-up cleared']));
@@ -410,4 +424,6 @@ ${sent ? '' : `<div class="crm-send"><div class="crm-sendh">📧 Email it</div>
   // never await Supabase calls inside the auth callback (it deadlocks the client); defer instead
   let lastUid; sb.auth.onAuthStateChange((ev, s) => { const uid = s && s.user ? s.user.id : null; if (uid !== lastUid) { lastUid = uid; setTimeout(refreshAuth, 0) } });
   setInterval(() => { if (isAdmin) load() }, 30000);
+  window.CRM = { get data() { return data }, get admin() { return isAdmin }, get me() { return me }, sb, load, toast, stopFollowups,
+    open(key) { openDetail(key) }, todo() { open = 'todo'; detail = null; showAdmin() }, signIn() { showSignIn('in') }, queue() { open = 'queue'; showAdmin() } };
 })();
