@@ -86,18 +86,42 @@ body:not(.fv-mini) .fv-open{display:none}
     const tip = L.control({ position: 'topright' });
     tip.onAdd = () => { const d = L.DomUtil.create('div', 'fv-tip'); d.textContent = 'Tap any empty spot on the map to queue a new run there.'; return d };
     tip.addTo(map);
-    map.on('click', e => {
-      const pop = `<div class="fv-pop"><b>Run a new area here</b><div class="s">${e.latlng.lat.toFixed(3)}, ${e.latlng.lng.toFixed(3)}</div>
-<input id="fvCity" placeholder="Area name, e.g. Tempe, AZ"><input id="fvInd" placeholder="Industry, e.g. roofers"><button class="p" id="fvGo">Queue this run</button></div>`;
-      L.popup().setLatLng(e.latlng).setContent(pop).openOn(map);
-      setTimeout(() => { const g = $('fvGo'); if (!g) return; g.onclick = async () => {
-        if (!window.CRM || !CRM.admin) { CRM && CRM.signIn(); return }
-        const city = $('fvCity').value.trim(), ind = $('fvInd').value.trim();
-        if (!city || !ind) { CRM.toast('Add an area name and an industry'); return }
-        const r = await CRM.sb.from('run_requests').insert({ city, industry: ind, lat: e.latlng.lat, lng: e.latlng.lng });
-        if (r.error) return CRM.toast(r.error.message);
-        map.closePopup(); CRM.toast('Queued. Tell Claude “run the queue”.'); await CRM.load();
-      } }, 30);
+    const ST = { Alabama: 'AL', Alaska: 'AK', Arizona: 'AZ', Arkansas: 'AR', California: 'CA', Colorado: 'CO', Connecticut: 'CT', Delaware: 'DE', Florida: 'FL', Georgia: 'GA', Hawaii: 'HI', Idaho: 'ID', Illinois: 'IL', Indiana: 'IN', Iowa: 'IA', Kansas: 'KS', Kentucky: 'KY', Louisiana: 'LA', Maine: 'ME', Maryland: 'MD', Massachusetts: 'MA', Michigan: 'MI', Minnesota: 'MN', Mississippi: 'MS', Missouri: 'MO', Montana: 'MT', Nebraska: 'NE', Nevada: 'NV', 'New Hampshire': 'NH', 'New Jersey': 'NJ', 'New Mexico': 'NM', 'New York': 'NY', 'North Carolina': 'NC', 'North Dakota': 'ND', Ohio: 'OH', Oklahoma: 'OK', Oregon: 'OR', Pennsylvania: 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC', 'South Dakota': 'SD', Tennessee: 'TN', Texas: 'TX', Utah: 'UT', Vermont: 'VT', Virginia: 'VA', Washington: 'WA', 'West Virginia': 'WV', Wisconsin: 'WI', Wyoming: 'WY', 'District of Columbia': 'DC' };
+    async function placeName(lat, lng) {
+      try {
+        const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1`, { headers: { 'Accept-Language': 'en' } });
+        const j = await r.json(), a = j.address || {};
+        const town = a.city || a.town || a.village || a.hamlet || a.suburb || a.county || '';
+        const st = ST[a.state] || a.state || '';
+        return [town.replace(/ County$/, ''), st].filter(Boolean).join(', ');
+      } catch (e) { return '' }
+    }
+    map.on('click', async e => {
+      const { lat, lng } = e.latlng;
+      const pop = L.popup({ minWidth: 230 }).setLatLng(e.latlng).setContent(`<div class="fv-pop"><b>Run this area</b><div class="s" id="fvWhere">Finding the area…</div>
+<input id="fvCity" placeholder="Area"><input id="fvInd" placeholder="Industry, e.g. roofers, plumbers" autocomplete="off"><button class="p" id="fvGo">Queue this run</button><div class="s" id="fvMsg" style="margin-top:6px"></div></div>`).openOn(map);
+      const wire = () => {
+        const g = $('fvGo'); if (!g) return;
+        $('fvInd').focus();
+        $('fvInd').onkeydown = ev => { if (ev.key === 'Enter') g.click() };
+        g.onclick = async () => {
+          if (!window.CRM || !CRM.admin) { $('fvMsg').textContent = 'Sign in first, then queue it.'; CRM && CRM.signIn(); return }
+          const city = $('fvCity').value.trim(), ind = $('fvInd').value.trim();
+          if (!ind) { $('fvMsg').textContent = 'Type an industry first.'; $('fvInd').focus(); return }
+          if (!city) { $('fvMsg').textContent = 'Add the area name.'; $('fvCity').focus(); return }
+          g.disabled = true; g.textContent = 'Queuing…';
+          const r = await CRM.sb.from('run_requests').insert({ city, industry: ind, lat, lng });
+          if (r.error) { g.disabled = false; g.textContent = 'Queue this run'; $('fvMsg').textContent = 'Couldn’t queue it: ' + r.error.message; return }
+          pop.setContent(`<div class="fv-pop"><b>Queued ✓</b><div class="s">${esc(ind)} in ${esc(city)}</div><div class="s">Now tell Claude “run the queue”.</div></div>`);
+          CRM.toast(`Queued: ${ind} in ${city}. Tell Claude “run the queue”.`);
+          await CRM.load(); setTimeout(() => { map.closePopup(); drawMap(false) }, 2500);
+        };
+      };
+      setTimeout(wire, 20);
+      const name = await placeName(lat, lng);
+      const w = $('fvWhere'), c = $('fvCity');
+      if (w) w.textContent = name ? 'Area: ' + name : `${lat.toFixed(3)}, ${lng.toFixed(3)} (type the area name)`;
+      if (c && !c.value) c.value = name;
     });
     drawMap(true);
   }
