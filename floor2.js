@@ -14,7 +14,7 @@
 .fv-bar{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:2px 0}
 .fv-bar button{flex:none;border:1px solid var(--line,#e3e6f0);background:#fff;border-radius:999px;padding:9px 16px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;color:#172036}
 .fv-bar button[aria-pressed=true]{background:#172036;color:#fff;border-color:#172036}
-.app{grid-template-columns:minmax(0,1fr)!important}.fv-view{position:relative;border-radius:22px;overflow:hidden;background:#eef1f7;min-height:560px;max-width:100%;min-height:480px}.fv-view.dash{min-height:0;overflow:visible;background:none}
+.app{grid-template-columns:minmax(0,1fr)!important}.fv-view{position:relative;isolation:isolate;z-index:0;border-radius:22px;overflow:hidden;background:#eef1f7;min-height:560px;max-width:100%;min-height:480px}.fv-view.dash{min-height:0;overflow:visible;background:none}
 #fvMap{position:absolute;inset:0;z-index:0}
 .fv-legend{position:absolute;z-index:500;left:12px;bottom:12px;background:#fff;border-radius:14px;padding:10px 12px;font-size:12.5px;box-shadow:0 6px 20px rgba(0,0,0,.12);display:grid;gap:4px}
 .fv-legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
