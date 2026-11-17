@@ -246,7 +246,10 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&selBiz)selectBiz(nu
 let office=null;
 function buildOffice(){
   if(!window.THREE)return null;const stage=$('stage'),canvas=$('cv');let R;
-  try{R=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true})}catch(e){return null}
+  for(const opt of [{antialias:true,alpha:true},{antialias:false,alpha:true,powerPreference:'low-power'},{antialias:false,alpha:false,powerPreference:'low-power',failIfMajorPerformanceCaveat:false}]){try{R=new THREE.WebGLRenderer(Object.assign({canvas},opt));break}catch(e){R=null}}
+  if(!R)return null;
+  canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();$('tags').insertAdjacentHTML('beforeend','<div class="empty" style="position:absolute" id="glLost"><div><p>The 3D office paused (your graphics card reset it).</p><p><button class="btn pri" type="button" onclick="location.reload()">Reload the office</button></p></div></div>')});
+  canvas.addEventListener('webglcontextrestored',()=>{const x=document.getElementById('glLost');if(x)x.remove()});
   R.setPixelRatio(Math.min(2,devicePixelRatio||1));R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
   const S=new THREE.Scene();const PI=Math.PI;
   let zoom=1,zoomT=1;const look=new THREE.Vector3(0,.8,0),lookT=new THREE.Vector3(0,.8,0);
@@ -618,7 +621,7 @@ function buildOffice(){
 }
 office=buildOffice();
 
-if(!office){$('tags').innerHTML='<div class="empty" style="position:absolute"><div><p>The 3D office needs WebGL, which this browser has turned off. The company board still updates live.</p></div></div>'}
+if(!office){$('tags').innerHTML='<div class="empty" style="position:absolute"><div><p>The 3D office couldn’t start its graphics. This usually clears with a reload; if not, fully close and reopen the browser (Chrome pauses 3D on a site after a graphics hiccup). The company board still updates live.</p><p><button class="btn pri" type="button" onclick="location.reload()">Try again</button></p></div></div>'}
 
 function setLive(s){const d=$('liveDot'),t=$('liveTxt');if(s==='live'){d.className='dot on';t.textContent='Live'}else if(s==='stale'){d.className='dot';t.textContent='Can’t reach live data yet'}else if(s==='off'){d.className='dot';t.textContent='Live data unavailable here'}else{d.className='dot';t.textContent='Connecting…'}}
 window.__applyRuns=function(list){runs=list.slice().sort((a,b)=>String(b.startedAt).localeCompare(String(a.startedAt)));if(selId&&!runs.find(r=>r.id===selId))selId=null;if(mode==='live')renderAll();else renderRuns()};
