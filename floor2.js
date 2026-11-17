@@ -29,6 +29,8 @@
 .db-fun div{display:grid;grid-template-columns:120px minmax(0,1fr) 44px;gap:10px;align-items:center;margin:6px 0;font-size:13.5px;font-weight:600}.db-fun i{display:block;height:14px;border-radius:7px;background:#3d5afe}.db-fun em{font-style:normal;font-weight:800;text-align:right}
 .db-days{display:flex;align-items:flex-end;gap:4px;height:120px;padding-top:6px}.db-days div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;align-items:stretch;min-width:0}
 .db-days i{display:block;border-radius:4px 4px 0 0}.db-days .a{background:#3d5afe}.db-days .b{background:#f59e0b}.db-days small{font-size:10px;color:#8a91a8;text-align:center;overflow:hidden}
+
+.db-win{display:inline-block;background:#e7f6ee;color:#11613f;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:700;margin-left:4px}
 .db-tbl{width:100%;border-collapse:collapse;font-size:13.5px}.db-tbl th{text-align:left;color:#5d6580;font-weight:700;font-size:12px;padding:6px 8px;border-bottom:1px solid #e3e6f0}.db-tbl td{padding:8px;border-bottom:1px solid #f0f2f7}.db-tbl tr[data-k]{cursor:pointer}.db-tbl tr[data-k]:hover{background:#f6f7fb}
 .db-key{display:flex;gap:14px;font-size:12px;color:#5d6580;margin-top:6px}.db-key i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}
 .db-empty{color:#8a91a8;font-size:13.5px}
@@ -221,12 +223,29 @@ body:not(.fv-mini) .fv-open{display:none}
     const names = [...new Set(sent.map(o => o.sent_by_name).filter(Boolean))];
     const team = names.map(n => { const mine = sent.filter(o => o.sent_by_name === n), keys = new Set(mine.map(o => o.company_key));
       return `<tr><td><b>${esc(n)}</b></td><td>${mine.length}</td><td>${new Set(ev.filter(e => keys.has(e.company_key) && ['email_open', 'email_click', 'pack_view', 'call_click'].includes(e.type)).map(e => e.company_key)).size}</td><td>${cs.filter(c => keys.has(c.key) && c.status === 'won').length}</td></tr>` }).join('');
+    // email styles (A/B) and subject lines: first emails only, judged on page views and yes taps (opens are fuzzy)
+    const yesN = uniq(['said_yes', 'wants_checkup']), noN = uniq(['said_no']);
+    const firsts = sent.filter(o => o.step === 1 && o.variant);
+    const byO = id => ev.filter(e => e.meta && Number(e.meta.outreach_id) === id);
+    const stat = list => { const n = list.length, op = list.filter(o => ev.some(e => e.type === 'email_open' && e.meta && e.meta.email_id === o.provider_id)).length,
+      vw = list.filter(o => byO(o.id).some(e => e.type === 'pack_view')).length, ys = list.filter(o => byO(o.id).some(e => ['said_yes', 'wants_checkup'].includes(e.type))).length,
+      tk = list.filter(o => { const c = cs.find(x => x.key === o.company_key); return c && ['replied', 'meeting', 'called', 'won'].includes(c.status) }).length;
+      return { n, op, vw, ys, tk, score: n ? (vw + 3 * ys + 5 * tk) / n : 0 } };
+    const STY = { A: 'A · finding + check-up link', B: 'B · finding, then “want me to send it?”' };
+    const grp = (keyf, label) => { const g = {}; for (const o of firsts) (g[keyf(o)] = g[keyf(o)] || []).push(o);
+      const rows = Object.entries(g).map(([k, l]) => [k, l, stat(l)]); const best = Math.max(0, ...rows.map(r => r[2].n >= 5 ? r[2].score : 0));
+      return rows.sort((a, b) => b[2].score - a[2].score).map(([k, l, x]) => `<tr><td><b>${esc(label(k, l))}</b>${x.n >= 5 && x.score === best && best > 0 ? ' <span class="db-win">leading</span>' : ''}</td><td>${x.n}</td><td>${pct(x.op, x.n)}</td><td>${pct(x.vw, x.n)}</td><td>${x.ys}</td><td>${x.tk}</td></tr>`).join('') };
+    const styRows = grp(o => o.variant, k => STY[k] || k), subRows = grp(o => o.subject_style || '?', (k, l) => l[0].subject.replace(/^Re: /, '') + (new Set(l.map(o => o.subject)).size > 1 ? ' (and similar)' : ''));
+    const abHead = '<thead><tr><th></th><th>Sent</th><th>Opened</th><th>Viewed page</th><th>Tapped yes</th><th>Talking</th></tr></thead>';
     const cname = k => (cs.find(c => c.key === k) || {}).name || k;
     const fuRows = sched.slice(0, 10).map(o => `<tr data-k="${esc(o.company_key)}"><td><b>${esc(cname(o.company_key))}</b></td><td>${o.step === 2 ? '2nd email' : '3rd email'}</td><td>${new Date(o.send_after).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</td></tr>`).join('');
     el.innerHTML = `<div class="db-grid">${K(cs.length, 'Companies checked', `${cs.filter(c => c.email).length} with an email`)}${K(contactedKeys.size, 'Contacted', `${wk} messages this week`)}${K(pct(opened, emailKeys.size), 'Email open rate', `${opened} of ${emailKeys.size} emails`)}${K(viewed, 'Viewed their page', `${pct(viewed, contactedKeys.size)} of contacted`)}
-${K(clicked, 'Clicked the link', 'from the email')}${K(talking, 'Talking', 'replied, called or meeting')}${K(won, 'Won', won ? 'closed deals' : 'first one coming')}${K(sched.length, 'Follow-ups queued', `${drafts} first emails waiting for you`)}</div>
+${K(yesN, 'Tapped yes', `${noN} said not now`)}${K(talking, 'Talking', 'replied, called or meeting')}${K(won, 'Won', won ? 'closed deals' : 'first one coming')}${K(sched.length, 'Follow-ups queued', `${drafts} first emails waiting for you`)}</div>
 <div class="db-two"><div class="db-card"><h3>Pipeline</h3><div class="db-fun">${fun.map(([l, n]) => `<div><span>${l}</span><i style="width:${Math.max(n ? 3 : 0, 100 * n / fmax)}%;background:${l === 'Won' ? '#16a34a' : l === 'Talking' ? '#ea580c' : l.startsWith('Opened') ? '#f59e0b' : '#3d5afe'}"></i><em>${n}</em></div>`).join('')}</div></div>
 <div class="db-card"><h3>Last 14 days</h3><div class="db-days">${days.map(x => `<div title="${x.lab}: ${x.a} sent, ${x.b} opens/views"><i class="a" style="height:${100 * x.a / dmax}px"></i><i class="b" style="height:${100 * x.b / dmax}px"></i><small>${x.lab}</small></div>`).join('')}</div><div class="db-key"><span><i style="background:#3d5afe"></i>Messages sent</span><span><i style="background:#f59e0b"></i>Opens and page views</span></div></div></div>
+<div class="db-two"><div class="db-card"><h3>Email styles</h3>${styRows ? `<div style="overflow-x:auto"><table class="db-tbl">${abHead}<tbody>${styRows}</tbody></table></div>` : '<p class="db-empty">Starts filling with the next run. Each first email gets style A or B.</p>'}</div>
+<div class="db-card"><h3>Subject lines</h3>${subRows ? `<div style="overflow-x:auto"><table class="db-tbl">${abHead}<tbody>${subRows}</tbody></table></div>` : '<p class="db-empty">Five subject lines rotate across first emails.</p>'}</div></div>
+<p class="db-empty" style="margin:-4px 0 14px">“Leading” needs at least 5 sends and is scored on page views, yes taps and conversations, not opens. Give it about 30 sends per style before trusting it.</p>
 <div class="db-card"><h3>Every area we’ve run</h3>${runs ? `<div style="overflow-x:auto"><table class="db-tbl"><thead><tr><th>Area</th><th>Companies</th><th>With email</th><th>Contacted</th><th>Opened / viewed</th><th>Talking</th><th>Run</th></tr></thead><tbody>${runs}</tbody></table></div>` : '<p class="db-empty">No runs yet.</p>'}</div>
 <div class="db-two"><div class="db-card"><h3>Follow-ups going out next</h3>${fuRows ? `<table class="db-tbl"><thead><tr><th>Company</th><th>Which</th><th>When</th></tr></thead><tbody>${fuRows}</tbody></table><p class="db-empty" style="margin-top:8px">Tap a row to open the company (and stop its follow-ups if they replied).</p>` : '<p class="db-empty">None scheduled. They’re added automatically when you send a first email.</p>'}</div>
 <div class="db-card"><h3>Who did what</h3>${team ? `<table class="db-tbl"><thead><tr><th>Person</th><th>Sent</th><th>Got interest</th><th>Won</th></tr></thead><tbody>${team}</tbody></table>` : '<p class="db-empty">Nothing sent yet.</p>'}</div></div>
@@ -242,4 +261,11 @@ ${K(clicked, 'Clicked the link', 'from the email')}${K(talking, 'Talking', 'repl
   document.addEventListener('crm:data', () => { drawMap(false); if (mode === 'dash') renderDash() });
   document.addEventListener('crm:auth', () => { drawMap(true); if (mode === 'dash') renderDash() });
   setInterval(() => { if (window.CRM && CRM.admin && document.visibilityState === 'visible') CRM.load() }, 60000);
+})();
+
+// alert emails link to /?c=<company>: open that company once the CRM has loaded (after sign-in)
+(function () {
+  const k = new URLSearchParams(location.search).get('c'); if (!k) return; let done = false;
+  const go = () => { if (done || !window.CRM || !CRM.admin || !CRM.data.companies.some(c => c.key === k)) return; done = true; try { CRM.open(k) } catch (e) {} };
+  addEventListener('crm:data', go); addEventListener('crm:auth', go); setTimeout(go, 3000);
 })();

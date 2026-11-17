@@ -7,7 +7,7 @@
   window.__sb = sb;
   const STATUSES = [['found', 'Found'], ['pack_ready', 'Pack ready'], ['approved', 'Approved'], ['sent', 'Sent'], ['opened', 'Opened email'], ['viewed', 'Viewed pack'], ['called', 'Called'], ['replied', 'Replied'], ['meeting', 'Meeting set'], ['won', 'Won'], ['lost', 'Lost'], ['do_not_contact', 'Do not contact']];
   const SL = Object.fromEntries(STATUSES);
-  const HOT = { call_click: 40, reply_click: 40, email_click: 25, pack_view: 15, email_open: 8, pack_time: 0, cta_click: 10 };
+  const HOT = { said_yes: 120, phone_left: 80, wants_checkup: 40, call_click: 40, reply_click: 40, email_click: 25, pack_view: 15, email_open: 8, pack_time: 0, cta_click: 10 };
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const ago = t => { const s = (Date.now() - new Date(t)) / 1000; if (s < 90) return 'just now'; if (s < 3600) return Math.round(s / 60) + ' min ago'; if (s < 86400) return Math.round(s / 3600) + ' h ago'; const d = Math.round(s / 86400); return d === 1 ? 'yesterday' : d + ' days ago' };
   const tel = p => p ? 'tel:' + p.replace(/[^\d+]/g, '') : null;
@@ -173,7 +173,8 @@
     const calls = ev.filter(x => x.type === 'call_click').length, opens = ev.filter(x => x.type === 'email_open').length, clicks = ev.filter(x => x.type === 'email_click').length;
     const last = ev[0] ? ev[0].created_at : null;
     const score = ev.reduce((a, x) => a + (HOT[x.type] || 0) * Math.max(.2, 1 - (Date.now() - new Date(x.created_at)) / (14 * 864e5)), 0);
-    return { ev, views, secs, calls, opens, clicks, last, score };
+    const yes = ev.some(x => x.type === 'said_yes'), no = ev.some(x => x.type === 'said_no'), asked = ev.some(x => x.type === 'wants_checkup'), lp = (ev.find(x => x.type === 'phone_left') || {}).meta;
+    return { ev, views, secs, calls, opens, clicks, last, score, yes, no, asked, phone: lp && lp.phone };
   }
   function callList() {
     const today = new Date().toISOString().slice(0, 10);
@@ -182,6 +183,10 @@
   }
   function sigHtml(s) {
     const out = [];
+    if (s.yes) out.push(`<span class="hot">✅ tapped “yes, call me”</span>`);
+    if (s.phone) out.push(`<span class="hot">☎️ best number: ${esc(s.phone)}</span>`);
+    if (s.asked) out.push(`<span class="hot">📄 asked for the check-up</span>`);
+    if (s.no) out.push(`<span>🙅 said not right now</span>`);
     if (s.calls) out.push(`<span class="hot">📞 tapped Call ${s.calls}×</span>`);
     if (s.views) out.push(`<span class="${s.views > 1 ? 'hot' : ''}">👀 viewed pack ${s.views}×</span>`);
     if (s.secs >= 20) out.push(`<span>⏱ ${s.secs >= 120 ? Math.round(s.secs / 60) + ' min' : s.secs + ' s'} on page</span>`);

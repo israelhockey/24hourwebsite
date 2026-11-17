@@ -162,7 +162,7 @@ try{await navigator.clipboard.writeText(el.innerText);btn.textContent='Copied'}c
 setTimeout(()=>btn.textContent='Copy text',1800)}));</script><script>window.__PACK_SLUG='super-steemers'</script><script>(function(){var U='https://qmuexcdukoqwyvdvplbt.supabase.co/rest/v1/events',K='sb_publishable_nxnT9XoFom10WSD3Qb6OFQ_oxUdBv70',slug=window.__PACK_SLUG;if(!slug)return;
 try{if(/[?&]from=floor/.test(location.search))localStorage.setItem('24hw_me','1');if(localStorage.getItem('24hw_me'))return}catch(e){}
 function send(type,meta){try{fetch(U,{method:'POST',keepalive:true,headers:{apikey:K,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({type:type,pack_slug:slug,meta:meta||{}})})}catch(e){}}
-var t0=Date.now(),page=location.pathname.indexOf('mock.html')>-1?'mock':'pack';send('pack_view',{page:page,ref:document.referrer||null,w:innerWidth});
+var t0=Date.now(),page=location.pathname.indexOf('mock.html')>-1?'mock':'pack';var o=(location.search.match(/[?&]o=([0-9a-f-]{36})/i)||[])[1];send('pack_view',o?{page:page,ref:document.referrer||null,w:innerWidth,o:o}:{page:page,ref:document.referrer||null,w:innerWidth});
 var sent=false;function bye(){if(sent)return;sent=true;send('pack_time',{page:page,seconds:Math.round((Date.now()-t0)/1000)})}
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')bye()});addEventListener('pagehide',bye);
 document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a');if(!a)return;var h=a.getAttribute('href')||'';

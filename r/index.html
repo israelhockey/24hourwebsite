@@ -1,0 +1,31 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>Thanks</title>
+<style>
+:root{--ink:#172036;--muted:#5d6580;--acc:#3d5afe;--paper:#f6f7fb;--line:#e3e6f0}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--paper);color:var(--ink);font:400 17px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:520px;margin:0 auto;padding:56px 20px}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px 22px}
+h1{font-size:26px;line-height:1.2;margin:0 0 10px}p{margin:0 0 12px;color:var(--muted)}
+form{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}input{flex:1 1 200px;font:inherit;padding:11px 13px;border:1px solid var(--line);border-radius:10px}
+button{font:inherit;font-weight:700;background:var(--acc);color:#fff;border:0;border-radius:10px;padding:11px 18px;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid #9fb0ff;outline-offset:2px}
+.sig{margin-top:18px;color:var(--ink)}small{display:block;margin-top:8px;color:var(--muted)}
+</style></head><body><main><div class="card" id="c"><h1>One sec…</h1></div></main>
+<script>
+(function(){
+var F='https://qmuexcdukoqwyvdvplbt.supabase.co/functions/v1/respond',K='sb_publishable_nxnT9XoFom10WSD3Qb6OFQ_oxUdBv70';
+var q=new URLSearchParams(location.search),t=q.get('t'),s=q.get('s'),a=q.get('a')||'yes',C=document.getElementById('c');
+function call(body){return fetch(F,{method:'POST',headers:{'Content-Type':'application/json',apikey:K},body:JSON.stringify(Object.assign({t:t,s:s},body))}).then(function(r){return r.json()})}
+function show(h){C.innerHTML=h}
+var sig='<p class="sig">Tom<br>24 Hour AI Solutions · (972) 388-1759</p>';
+call({a:a}).then(function(r){
+  if(r.error&&!r.ok){show('<h1>Thanks!</h1><p>Something hiccuped on my end, but you can reach me directly at <a href="tel:+19723881759">(972) 388-1759</a> or just reply to my email.</p>'+sig);return}
+  if(a==='send'&&r.url){location.replace(r.url+(t?'?o='+encodeURIComponent(t):''));return}
+  if(a==='no'){show('<h1>No problem at all.</h1><p>I won’t follow up again. If anything changes down the road, I’m at <a href="tel:+19723881759">(972) 388-1759</a>.</p>'+sig);return}
+  show('<h1>Got it, thanks!</h1><p>I’ll give you a call today'+(r.phone?' at <b>'+r.phone.replace(/</g,'')+'</b>':'')+'. If there’s a better number, drop it here:</p>'+
+   '<form id="f"><input id="p" type="tel" autocomplete="tel" placeholder="Best number to reach you" aria-label="Best number"><button>Save</button></form><small id="m"></small>'+sig);
+  document.getElementById('f').onsubmit=function(e){e.preventDefault();var v=document.getElementById('p').value,m=document.getElementById('m');m.textContent='Saving…';
+    call({a:'phone',phone:v}).then(function(x){m.textContent=x.ok?'Saved. Talk soon.':(x.error||'Couldn’t save that one, try again.')}).catch(function(){m.textContent='Couldn’t save that one, try again.'})};
+}).catch(function(){show('<h1>Thanks!</h1><p>Reach me directly at <a href="tel:+19723881759">(972) 388-1759</a>.</p>'+sig)});
+})();
+</script></body></html>
