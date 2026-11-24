@@ -262,7 +262,7 @@ ${teamHtml(sent, ev)}<div class="crm-card"><h3 class="st-h">Pipeline</h3><div cl
     body.querySelectorAll('tr[data-open]').forEach(r => r.onclick = () => openDetail(r.dataset.open));
   }
   const unsent = c => data.outreach.find(o => o.company_key === c.key && o.status === 'draft' && !o.auto);
-  const toReach = c => ['found', 'pack_ready', 'approved'].includes(c.status) && !!c.pack_url && !data.outreach.some(o => o.company_key === c.key && o.status === 'sent');
+  const toReach = c => (['found', 'pack_ready', 'approved'].includes(c.status) && !!c.pack_url && !data.outreach.some(o => o.company_key === c.key && o.status === 'sent')) || (!['replied', 'meeting', 'won', 'lost', 'do_not_contact'].includes(c.status) && data.outreach.some(o => o.company_key === c.key && o.status === 'draft' && o.variant === 'D' && !o.auto));
   const live = () => data.companies.filter(c => c.key !== 'test-tal');
   function followUps(hot) {
     return live().filter(c => ['sent', 'opened'].includes(c.status) && !hot.has(c.key)).map(c => {
