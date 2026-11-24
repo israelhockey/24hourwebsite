@@ -28,6 +28,7 @@ tr.c{cursor:pointer}tr.c:hover td{background:#f8f9ff}.tw{overflow-x:auto;border-
 .bars{display:flex;gap:4px;align-items:flex-end;height:90px}.bars div{flex:1;background:var(--acc);border-radius:4px 4px 0 0;min-height:2px;position:relative}.bars div.b2{background:#9fb0ff}
 .drawer{position:fixed;inset:0 0 0 auto;width:min(560px,100%);background:#fff;border-left:1px solid var(--line);z-index:40;overflow-y:auto;padding:18px;box-shadow:-8px 0 30px rgba(0,0,0,.12)}
 .drawer h3{margin:0 0 4px;font-size:20px}.tl{list-style:none;padding:0;margin:8px 0}.tl li{padding:6px 0;border-bottom:1px solid var(--line);font-size:14px;display:flex;justify-content:space-between;gap:10px}
+.cs-act{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.btn.big{font-size:17px;padding:12px 18px;flex:1 1 100%;text-align:center}.cs-box{background:#f8f9fc;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:10px 0}.cs-box.hot{background:#fff4f6;border-color:#ffd0d8}.cs-l{margin:4px 0;padding-left:18px}.cs-l li{margin:3px 0}.cs-out{display:flex;gap:6px;flex-wrap:wrap}
 .empty{color:var(--muted);padding:14px;text-align:center}
 #map{height:360px;border-radius:12px;border:1px solid var(--line);margin-bottom:10px}
 .auth{max-width:340px;margin:12vh auto;background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px}.auth input{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;margin:5px 0}
@@ -213,25 +214,65 @@ function initMap(){
   if(!document.getElementById('lfcss')){const l=document.createElement('link');l.id='lfcss';l.rel='stylesheet';l.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';document.head.appendChild(l)}
   const s=document.createElement('script');s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';s.onload=go;document.head.appendChild(s);
 }
-/* Company drawer */
+/* Company drawer = call sheet */
+const stamp=()=>new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:'America/Los_Angeles'});
+const addDays=n=>{const d=new Date(Date.now()+n*864e5);return d.toISOString().slice(0,10)};
+const url=u=>u?(/^https?:/i.test(u)?u:'https://'+u):'';
 async function openDrawer(key,keep){
   const c=byKey(key);if(!c)return;drawerKey=key;
   const dr=$('dr');if(!keep||!dr.innerHTML)dr.innerHTML=`<div class="drawer"><div class="empty">Loading…</div></div>`;
-  const [e,o]=await Promise.all([sb.from('events').select('type,created_at,meta').eq('company_key',key).neq('type','email_delivered').order('created_at',{ascending:false}).limit(60),sb.from('outreach').select('id,step,status,subject,sent_at,send_after,variant,subject_style,body,to_address').eq('company_key',key).order('id',{ascending:true})]);
+  const [e,o,f,x]=await Promise.all([
+    sb.from('events').select('type,created_at,meta').eq('company_key',key).neq('type','email_delivered').order('created_at',{ascending:false}).limit(60),
+    sb.from('outreach').select('id,step,status,subject,sent_at,send_after,variant,subject_style,body,to_address').eq('company_key',key).order('id',{ascending:true}),
+    sb.from('findings').select('title,detail').eq('company_key',key).limit(8),
+    sb.from('companies').select('website,contact_note,notes,email,phone').eq('key',key).maybeSingle()]);
   if(drawerKey!==key)return;
-  const L=[];(e.data||[]).forEach(x=>L.push([x.created_at,x.type.replace(/_/g,' ')+(x.meta&&x.meta.phone?': '+x.meta.phone:'')]));
-  (o.data||[]).forEach(x=>{if(x.sent_at)L.push([x.sent_at,'email sent'+(x.step>1?' (follow-up '+(x.step-1)+')':'')+(x.variant?' · style '+x.variant:'')+' · "'+(x.subject||'')+'"'])});
-  L.sort((a,b)=>ms(b[0])-ms(a[0]));const sched=(o.data||[]).filter(x=>x.status==='scheduled');
-  dr.innerHTML=`<div class="drawer"><div class="row"><div class="grow"><h3>${esc(c.name)}</h3><div class="sm">${esc(c.city||'')}${c.industry?' · '+esc(c.industry):''}${c.rating?' · '+c.rating+'★ ('+(c.reviews||0)+')':''}</div></div><button class="btn" id="dx">Close</button></div>
-<p>${pill(c)} ${c.maps_pos?`<span class="sm">Maps #${c.maps_pos}</span>`:''}</p>
-<div class="row">${c.phone?`<a class="btn go" href="tel:${esc(c.phone.replace(/[^\d+]/g,''))}">Call ${esc(c.phone)}</a><a class="btn" href="sms:${esc(c.phone.replace(/[^\d+]/g,''))}">Text</a>`:''}${c.email?`<a class="btn" href="mailto:${esc(c.email)}">${esc(c.email)}</a>`:''}${c.pack_url?`<a class="btn" target="_blank" rel="noopener" href="${esc(c.pack_url)}?from=floor">Their page</a>`:''}</div>
-<p class="sm" style="margin-top:12px">Status</p><div class="row"><select id="ds" style="padding:8px;border:1px solid var(--line);border-radius:9px">${STAT.map(s=>`<option value="${s[0]}" ${c.status===s[0]?'selected':''}>${s[1]}</option>`).join('')}</select>${sched.length?`<button class="btn" id="dstop">Stop ${sched.length} scheduled follow-up${sched.length>1?'s':''}</button>`:''}</div>
-<p class="sm" style="margin-top:12px">Notes</p><textarea id="dn">${esc(c.notes||'')}</textarea><div style="margin-top:6px"><button class="btn" id="dsave">Save notes</button></div>
-<h2 style="font-size:15px">Timeline</h2><ul class="tl">${L.length?L.map(x=>`<li><span>${esc(x[1])}</span><span class="sm">${ago(x[0])}</span></li>`).join(''):'<li class="sm">Nothing yet.</li>'}</ul></div>`;
+  const x1=x.data||{},site=url(x1.website),notes=x1.notes||c.notes||'',phone=x1.phone||c.phone,email=x1.email||c.email;
+  const tel=phone?phone.replace(/[^\d+]/g,''):'';
+  const L=[];(e.data||[]).forEach(v=>L.push([v.created_at,v.type.replace(/_/g,' ')+(v.meta&&v.meta.phone?': '+v.meta.phone:'')]));
+  const mails=(o.data||[]).filter(v=>v.sent_at),first=(o.data||[]).find(v=>v.step===1);
+  mails.forEach(v=>L.push([v.sent_at,'email sent'+(v.step>1?' (follow-up '+(v.step-1)+')':'')+(v.variant?' · style '+v.variant:'')]));
+  L.sort((p,q)=>ms(q[0])-ms(p[0]));const sched=(o.data||[]).filter(v=>v.status==='scheduled');
+  const finds=(f.data||[]);const did=why(c);
+  const maps='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(c.name+' '+(c.city||''));
+  dr.innerHTML=`<div class="drawer">
+<div class="row" style="align-items:flex-start"><div class="grow"><h3>${esc(c.name)}</h3><div class="sm">${esc(c.city||'')}${c.industry?' · '+esc(c.industry):''}${c.rating?' · '+c.rating+'★ ('+(c.reviews||0)+' reviews)':''}${c.maps_pos?' · Maps #'+c.maps_pos:''}</div><div style="margin-top:6px">${pill(c)}</div></div><button class="btn" id="dx">Close</button></div>
+<div class="cs-act">${tel?`<a class="btn go big" href="tel:${esc(tel)}">📞 Call ${esc(phone)}</a>`:'<span class="sm">No phone number on file</span>'}
+${tel?`<a class="btn" href="sms:${esc(tel)}">💬 Text</a>`:''}
+${site?`<a class="btn p" target="_blank" rel="noopener" href="${esc(site)}">🌐 Their website</a>`:'<span class="btn" style="opacity:.6">No website on Google listing</span>'}
+${c.pack_url?`<a class="btn" target="_blank" rel="noopener" href="${esc(c.pack_url)}?from=floor">📄 Their check-up page</a>`:''}
+<a class="btn" target="_blank" rel="noopener" href="${esc(maps)}">📍 Google listing</a>
+${email?`<a class="btn" href="mailto:${esc(email)}">✉️ ${esc(email)}</a>`:''}</div>
+${did?`<div class="cs-box hot"><b>What they did:</b> ${esc(did)}</div>`:''}
+<div class="cs-box"><b>What to say</b>
+<p style="margin:6px 0"><i>“Hi, is this the owner? It’s Tom with 24 Hour AI Solutions. ${c.sent>0?'I sent you a quick note about':'I was looking at'} how ${esc(c.name)} shows up on Google.”</i></p>
+${finds.length?`<div class="sm" style="margin-top:6px">What we found:</div><ul class="cs-l">${finds.map(v=>`<li><b>${esc(v.title)}</b>${v.detail?'<br><span class="sm">'+esc(v.detail)+'</span>':''}</li>`).join('')}</ul>`:'<div class="sm">No check-up findings on file.</div>'}
+<div class="sm" style="margin-top:6px">Offers:</div><ul class="cs-l"><li>Free preview of a fixed homepage, built in about a day.</li><li>Voice assistant that answers missed calls: they can try it at <b>(469) 779-9037</b>.</li><li>Priced on what their business actually needs.</li></ul>
+${x1.contact_note?`<div class="sm" style="margin-top:6px">On file: ${esc(x1.contact_note)}</div>`:''}</div>
+<p class="sm" style="margin:14px 0 6px"><b>After the call</b></p>
+<div class="cs-out"><button class="btn" data-o="noans">No answer</button><button class="btn" data-o="vm">Left voicemail</button><button class="btn go" data-o="int">Interested</button><button class="btn" data-o="meet">Meeting set</button><button class="btn" data-o="no">Not interested</button><button class="btn" data-o="won">Won</button></div>
+<div class="row" style="margin-top:8px"><span class="sm">Call back on</span><input type="date" id="dcb" value="${esc(c.follow_up||'')}" style="padding:7px;border:1px solid var(--line);border-radius:9px"><button class="btn" id="dcbs">Set</button></div>
+<p class="sm" style="margin:14px 0 4px">Notes (saves when you click away)</p><textarea id="dn" style="min-height:110px">${esc(notes)}</textarea>
+<div class="row" style="margin-top:6px"><input id="dq" placeholder="Quick note, e.g. owner is Mike, call after 3pm" style="flex:1;min-width:180px;padding:8px;border:1px solid var(--line);border-radius:9px"><button class="btn" id="dqa">Add note</button></div>
+${first?`<details style="margin-top:12px"><summary>The email we sent (${esc(first.subject||'')})</summary><div class="msg">${esc((first.body||'').replace(/\{sender\}/g,'Tom').replace(/\{(\w+)\|([^}]+)\}/g,'[$2]'))}</div></details>`:''}
+<p class="sm" style="margin:14px 0 6px">Status</p><div class="row"><select id="ds" style="padding:8px;border:1px solid var(--line);border-radius:9px">${STAT.map(v=>`<option value="${v[0]}" ${c.status===v[0]?'selected':''}>${v[1]}</option>`).join('')}</select>${sched.length?`<button class="btn" id="dstop">Stop ${sched.length} scheduled follow-up${sched.length>1?'s':''}</button>`:''}</div>
+<h2 style="font-size:15px">Timeline</h2><ul class="tl">${L.length?L.map(v=>`<li><span>${esc(v[1])}</span><span class="sm">${ago(v[0])}</span></li>`).join(''):'<li class="sm">Nothing yet.</li>'}</ul></div>`;
+  const upd=async(patch,msg)=>{const r=await sb.from('companies').update(Object.assign({updated_at:new Date().toISOString(),updated_by_name:me},patch)).eq('key',key);if(r.error)return toast(r.error.message);toast(msg||'Saved');load()};
+  const addNote=t=>{const cur=$('dn').value.trim();return (cur?cur+'\n':'')+'['+stamp()+'] '+t};
   $('dx').onclick=()=>{drawerKey=null;dr.innerHTML=''};
-  $('ds').onchange=async ev=>{const r=await sb.from('companies').update({status:ev.target.value,updated_at:new Date().toISOString(),updated_by_name:me}).eq('key',key);if(r.error)return toast(r.error.message);toast('Saved');load()};
-  $('dsave').onclick=async()=>{const r=await sb.from('companies').update({notes:$('dn').value,updated_at:new Date().toISOString(),updated_by_name:me}).eq('key',key);toast(r.error?r.error.message:'Saved')};
-  const st=$('dstop');if(st)st.onclick=async()=>{const r=await sb.from('outreach').update({status:'cancelled'}).eq('company_key',key).eq('auto',true).eq('status','scheduled');toast(r.error?r.error.message:'Follow-ups stopped');load()};
+  $('ds').onchange=ev=>upd({status:ev.target.value});
+  $('dn').onblur=async()=>{if($('dn').value!==notes){const r=await sb.from('companies').update({notes:$('dn').value,updated_at:new Date().toISOString(),updated_by_name:me}).eq('key',key);toast(r.error?r.error.message:'Notes saved')}};
+  $('dqa').onclick=()=>{const t=$('dq').value.trim();if(!t)return;upd({notes:addNote(t)},'Note added')};
+  $('dcbs').onclick=()=>{const v=$('dcb').value;if(!v)return;upd({follow_up:v},'Call-back set')};
+  const stopF=()=>sb.from('outreach').update({status:'cancelled'}).eq('company_key',key).eq('auto',true).eq('status','scheduled');
+  dr.querySelectorAll('[data-o]').forEach(b=>b.onclick=async()=>{const k=b.dataset.o;
+    if(k==='noans')return upd({notes:addNote('Called, no answer'),follow_up:addDays(1)},'Logged. Call-back set for tomorrow');
+    if(k==='vm')return upd({notes:addNote('Left voicemail'),follow_up:addDays(2)},'Logged. Call-back set in 2 days');
+    if(k==='int'){await stopF();return upd({notes:addNote('Talked, interested'),status:'replied',follow_up:addDays(1)},'Logged as interested')}
+    if(k==='meet'){await stopF();return upd({notes:addNote('Meeting set'),status:'meeting'},'Meeting set')}
+    if(k==='no'){await stopF();return upd({notes:addNote('Not interested'),status:'lost'},'Marked not interested')}
+    if(k==='won'){await stopF();return upd({notes:addNote('Won'),status:'won'},'Marked won')}});
+  const st=$('dstop');if(st)st.onclick=async()=>{const r=await stopF();toast(r.error?r.error.message:'Follow-ups stopped');load()};
 }
 /* auth */
 function signIn(msg){
