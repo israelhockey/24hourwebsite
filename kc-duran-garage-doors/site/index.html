@@ -244,6 +244,14 @@ section.jobs{position:relative;height:340svh;background:#0e1b3d;color:#fff}
 .tstage.wide .tback{display:none}
 .tstage.wide .tl{text-shadow:0 4px 40px rgba(0,0,0,.6)}
 @media(max-width:860px){.tstage.wide .tshade{background:linear-gradient(rgba(14,27,61,0) 40%,rgba(14,27,61,.88))}}
+
+.route{position:fixed;right:8px;top:84px;bottom:84px;width:34px;z-index:58;pointer-events:none;opacity:0;transition:opacity .4s}
+.route.on{opacity:1}
+.route .rd{position:absolute;left:50%;top:0;bottom:0;width:0;border-left:2px dashed rgba(255,255,255,.55);filter:drop-shadow(0 0 3px rgba(0,0,0,.6))}
+.rt{position:absolute;left:50%;top:0;width:68px;height:32px;margin-left:-34px;will-change:transform;filter:drop-shadow(0 3px 6px rgba(0,0,0,.55))}
+.rt svg{width:100%;height:100%;display:block}
+.rt .wh{will-change:transform}
+@media(max-width:860px){.route{right:2px;top:78px;bottom:100px;width:24px}.rt{width:48px;height:22.5px;margin-left:-24px}}
 </style></head><body class="nojs">
 <header class="top"><a href="#top" aria-label="KC Duran Garage Doors"><svg viewBox="0 0 80 64" width="92" height="92" aria-hidden="true"><g fill="#d62839"><rect x="0" y="22" width="16" height="4"/><rect x="0" y="31" width="16" height="4"/><rect x="0" y="40" width="16" height="4"/><rect x="64" y="22" width="16" height="4"/><rect x="64" y="31" width="16" height="4"/><rect x="64" y="40" width="16" height="4"/></g><path d="M14 6h52v30c0 13-12 21-26 26C26 57 14 49 14 36z" fill="#1f3f8f"/><path d="M18 18h44v18c0 10-10 17-22 21-12-4-22-11-22-21z" fill="#fff"/><g fill="#fff"><circle cx="24" cy="12" r="2"/><circle cx="32" cy="12" r="2"/><circle cx="40" cy="12" r="2"/><circle cx="48" cy="12" r="2"/><circle cx="56" cy="12" r="2"/></g><text x="40" y="35" text-anchor="middle" font-family="Big Shoulders Display,Impact,sans-serif" font-size="15" font-weight="900" fill="#1f3f8f">KC DURAN</text><text x="40" y="46" text-anchor="middle" font-family="Big Shoulders Display,Impact,sans-serif" font-size="8.5" font-weight="800" fill="#d62839" letter-spacing=".5">GARAGE DOORS</text></svg></a><a class="btn red" href="tel:+14809964020">Call (480) 996-4020</a></header>
 
@@ -354,6 +362,7 @@ section.jobs{position:relative;height:340svh;background:#0e1b3d;color:#fff}
 
 <footer><div class="w"><div style="display:flex;gap:14px;align-items:center"><svg viewBox="0 0 80 64" width="92" height="92" aria-hidden="true"><g fill="#d62839"><rect x="0" y="22" width="16" height="4"/><rect x="0" y="31" width="16" height="4"/><rect x="0" y="40" width="16" height="4"/><rect x="64" y="22" width="16" height="4"/><rect x="64" y="31" width="16" height="4"/><rect x="64" y="40" width="16" height="4"/></g><path d="M14 6h52v30c0 13-12 21-26 26C26 57 14 49 14 36z" fill="#1f3f8f"/><path d="M18 18h44v18c0 10-10 17-22 21-12-4-22-11-22-21z" fill="#fff"/><g fill="#fff"><circle cx="24" cy="12" r="2"/><circle cx="32" cy="12" r="2"/><circle cx="40" cy="12" r="2"/><circle cx="48" cy="12" r="2"/><circle cx="56" cy="12" r="2"/></g><text x="40" y="35" text-anchor="middle" font-family="Big Shoulders Display,Impact,sans-serif" font-size="15" font-weight="900" fill="#1f3f8f">KC DURAN</text><text x="40" y="46" text-anchor="middle" font-family="Big Shoulders Display,Impact,sans-serif" font-size="8.5" font-weight="800" fill="#d62839" letter-spacing=".5">GARAGE DOORS</text></svg><div><b style="color:#fff">KC Duran Garage Doors</b><br>Mesa, AZ · Service, sales, repair</div></div><div>Emergency 24-hour service · <a href="tel:+14809964020" style="color:#fff;font-weight:800">(480) 996-4020</a></div></div></footer>
 
+<div class="route" id="route" aria-hidden="true"><i class="rd"></i><div class="rt" id="rt"><svg viewBox="0 0 64 30"><path d="M3 8h28M5 8v3M29 8v3" stroke="#0e1b3d" stroke-width="1.2" stroke-linecap="round"/><rect x="2" y="10" width="29" height="11.5" rx="2" fill="#f4f6fb" stroke="#0e1b3d" stroke-width="1.2"/><rect x="2.6" y="15.2" width="28" height="2" fill="#d62839"/><rect x="2.6" y="17.2" width="28" height="1.6" fill="#1f3f8f"/><path d="M31 21.5V9.5h9.5L47 14.5h11.5c2.6 0 3.8 1.6 3.8 4v3H31z" fill="#f4f6fb" stroke="#0e1b3d" stroke-width="1.2" stroke-linejoin="round"/><path d="M34 11.2h6l4.2 3.3H34z" fill="#1f3f8f"/><rect x="60" y="16" width="2.6" height="2.4" fill="#ffcf86"/><g class="wh" style="transform-origin:14px 23px"><circle cx="14" cy="23" r="5.4" fill="#0e1b3d"/><path d="M14 18.6v8.8M9.6 23h8.8" stroke="#cfd7ee" stroke-width="1.3"/></g><g class="wh" style="transform-origin:50px 23px"><circle cx="50" cy="23" r="5.4" fill="#0e1b3d"/><path d="M50 18.6v8.8M45.6 23h8.8" stroke="#cfd7ee" stroke-width="1.3"/></g></svg></div></div>
 <div class="mbar" id="mbar"><a class="btn red" href="tel:+14809964020">Call now</a><a class="btn wh" href="sms:+14809964020?&body=Hi%20Kyler%2C%20here%27s%20a%20photo%20of%20my%20garage%20door%3A">Text a photo</a></div>
 <div class="lb" id="lb" role="dialog" aria-label="Photo"><img alt=""></div>
 
@@ -409,7 +418,7 @@ function cover(cx,cv,im){var cw=cv.width,ch=cv.height,r=Math.max(cw/im.naturalWi
 var N=95,TN=79,fr=null,tr=null,tick=false;
 var op=$('.opener'),cv=$('#cv'),cx=cv.getContext('2d'),hint=$('#hint'),hero=$('#heroIn'),shade=$('#shade'),mbar=$('#mbar'),ob=$('#openBtn'),words=$$('.hi .wd,.hi .hs');
 var tstage=$('.tstage'),tflash=$('#tflash'),tsec=$('#truck'),tcv=$('#tcv'),tcx=tcv.getContext('2d'),tls=$$('.tl'),xsec=$('#exit'),xcv=$('#xcv'),xcx=xcv.getContext('2d'),xshade=$('#xshade'),xcopy=$('#xcopy');
-var jsec=$('#work'),jtrack=$('#jt'),jbig=$('#jbig'),jfill=$('#jfill'),jcs=$$('.jc'),cur=-1,tcur=-1,xcur=-1;
+var route=$('#route'),rt=$('#rt'),jsec=$('#work'),jtrack=$('#jt'),jbig=$('#jbig'),jfill=$('#jfill'),jcs=$$('.jc'),cur=-1,tcur=-1,xcur=-1;
 function fit(){var d=Math.min(devicePixelRatio||1,2);cv.width=innerWidth*d;cv.height=innerHeight*d;xcv.width=innerWidth*d;xcv.height=innerHeight*d;cur=-1;xcur=-1;req()}
 fr=loadSeq('fr/',N);
 var tloaded=false;function needTruck(){if(!tloaded){tloaded=true;tr=loadSeq('tr/',TN)}}
@@ -428,6 +437,8 @@ function frame(){tick=false;
  var j=prog(jsec),jp=j.p;
  if(j.r.top<innerHeight&&j.r.bottom>0){var tw=jtrack.scrollWidth-innerWidth,jx=-jp*tw;jtrack.style.transform='translate3d('+jx+'px,0,0)';jbig.style.transform='translate3d('+(jp*-(jbig.scrollWidth-innerWidth*.4))+'px,-50%,0)';jfill.style.width=(jp*100)+'%';
   jcs.forEach(function(c){var r=c.getBoundingClientRect(),d=((r.left+r.width/2)-innerWidth/2)/innerWidth,ad=Math.min(1,Math.abs(d));c.style.transform='rotate('+(d*7)+'deg) scale('+(1.07-ad*.2)+')';c.style.filter='brightness('+(1-ad*.55)+')';c.firstElementChild.style.transform='translateX('+(-d*60)+'px)'})}
+ var dh=document.documentElement.scrollHeight-innerHeight,gp=dh>0?cl(scrollY/dh):0,rH=route.clientHeight,rw=rt.offsetWidth;
+ var ty=gp*(rH-rw)+(rw-rt.offsetHeight)/2;rt.style.transform='translateY('+ty+'px) rotate(90deg)';var rot=(scrollY*.9)%360;$$('.wh',rt).forEach(function(w){w.style.transform='rotate('+rot+'deg)'});route.classList.toggle('on',o.p>.9||o.r.bottom<innerHeight*.5);
  var x=prog(xsec),xp=x.p;
  if(x.r.top<innerHeight*2&&x.r.bottom>-innerHeight){var xf=Math.max(0,Math.min(N-1,Math.round((1-ease(cl(xp/.7)))*(N-1))));if(xf!==xcur){var xm=pick(fr,xf);if(xm){xcur=xf;cover(xcx,xcv,xm)}}}
  var xa=ease(cl((xp-.55)/.3));xshade.style.opacity=xa;xcopy.style.opacity=xa;xcopy.style.pointerEvents=xa>.6?'auto':'none';xcopy.style.transform='translateY('+((1-xa)*30)+'px)';
