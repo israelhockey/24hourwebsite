@@ -45,7 +45,7 @@ const SB_URL='https://qmuexcdukoqwyvdvplbt.supabase.co',KEY='sb_publishable_nxnT
 const sb=window.supabase.createClient(SB_URL,KEY,{auth:{persistSession:true,autoRefreshToken:true}});
 const $=id=>document.getElementById(id),esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const DEMO='(469) 779-9037';
-const STAT=[['found','Found'],['pack_ready','Pack ready'],['approved','Approved'],['sent','Sent'],['opened','Opened email'],['viewed','Viewed pack'],['called','Called'],['replied','Replied'],['meeting','Meeting set'],['won','Won'],['lost','Lost'],['do_not_contact','Do not contact']];
+const STAT=[['found','Found'],['pack_ready','Pack ready'],['approved','Approved'],['sent','Sent'],['opened','Opened email'],['viewed','Viewed pack'],['called','Called, waiting for call back'],['replied','Replied'],['meeting','Meeting set'],['won','Won'],['lost','Lost'],['do_not_contact','Do not contact']];
 const CLOSED=['won','lost','do_not_contact','meeting'];
 let D=null,tab='today',admin=false,me='',F={q:'',stage:'',ind:'',city:'',sort:'last',dir:-1},drawerKey=null,loadedAt=0,mapInit=false;
 const toast=t=>{const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)};
@@ -54,6 +54,7 @@ const ms=t=>t?new Date(t).getTime():0,dAgo=t=>(Date.now()-ms(t))/864e5;
 const ev=(c,t)=>(c.ev&&c.ev[t])||null,evn=(c,t)=>{const e=ev(c,t);return e?e.n:0},evl=(c,t)=>{const e=ev(c,t);return e?e.last:null};
 const lastAct=c=>Math.max(0,...Object.values(c.ev||{}).map(e=>ms(e.last)),ms(c.last_sent));
 function stage(c){
+  if(c.status==='called')return['Waiting for call back','hot',6];
   if(c.status==='won')return['Won','ok',9];if(c.status==='meeting')return['Meeting set','ok',8];
   if(c.status==='lost'||c.status==='do_not_contact'||evn(c,'said_no'))return['Closed','gr',0];
   if(evn(c,'said_yes'))return['Said yes','hot',7];if(evn(c,'demo_tap'))return['Tried voice demo','hot',6];
@@ -75,7 +76,7 @@ function shell(){
   $('rf').onclick=()=>load();$('out').onclick=()=>sb.auth.signOut();
 }
 function nav(){
-  const t=todayLists();const n=t.hot.length+t.viewed.length+t.drafts.length+t.due.length+t.failed.length;
+  const t=todayLists();const n=t.hot.length+t.waiting.length+t.viewed.length+t.drafts.length+t.due.length+t.failed.length;
   const T=[['today','Today',n],['pipeline','Pipeline'],['results','Results'],['voice','Voice'],['runs','Runs']];
   $('nav').innerHTML=T.map(x=>`<button data-t="${x[0]}" aria-selected="${tab===x[0]}">${x[1]}${x[2]?`<b>${x[2]}</b>`:''}</button>`).join('');
   $('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
@@ -93,9 +94,10 @@ function todayLists(){
   const vs=new Set(viewed.map(c=>c.key));
   const opened=C.filter(c=>!hs.has(c.key)&&!vs.has(c.key)&&!CLOSED.includes(c.status)&&evn(c,'email_open')>=2&&dAgo(evl(c,'email_open'))<3&&!evn(c,'email_bounce'));
   const today=new Date().toISOString().slice(0,10);
-  const due=C.filter(c=>c.follow_up&&c.follow_up<=today&&!CLOSED.includes(c.status)&&!hs.has(c.key));
+  const due=C.filter(c=>c.follow_up&&c.follow_up<=today&&!CLOSED.includes(c.status)&&c.status!=='called'&&!hs.has(c.key));
+  const waiting=C.filter(c=>c.status==='called').sort((a,b)=>(a.follow_up||'9')<(b.follow_up||'9')?-1:1);
   const drafts=D.drafts.filter(d=>d.status==='draft'&&/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.to||'')&&!/\[[^\]]*\]/.test(d.body)),failed=D.drafts.filter(d=>d.status==='failed');
-  return{hot,viewed,opened,due,drafts,failed};
+  return{hot,waiting,viewed,opened,due,drafts,failed};
 }
 function why(c){const o=[];if(evn(c,'said_yes'))o.push('tapped yes, call me');if(evn(c,'demo_tap'))o.push('tapped to try the voice demo');if(evn(c,'wants_checkup'))o.push('asked for the check-up');if(evn(c,'phone_left'))o.push('left a number');if(c.status==='replied')o.push('replied');if(evn(c,'pack_view'))o.push('viewed page '+evn(c,'pack_view')+'×');return o.join(' · ')}
 function card(c,extra){
@@ -111,6 +113,7 @@ function vToday(m){
   const dl=D.daily[D.daily.length-1]||{};
   let h=`<div class="tiles"><div class="tile"><b>${t.hot.length}</b><span>hot, call now</span></div><div class="tile"><b>${t.viewed.length}</b><span>viewed their page (7d)</span></div><div class="tile"><b>${t.drafts.length}</b><span>emails to send</span></div><div class="tile"><b>${C.filter(c=>c.pending>0).length}</b><span>in follow-up sequence</span></div><div class="tile"><b>${sent}</b><span>businesses contacted</span></div></div>`;
   h+=`<h2>🔥 Call now <span class="n">${t.hot.length}</span></h2>`+(t.hot.length?t.hot.map(c=>card(c,why(c)+' · '+ago(lastAct(c)))).join(''):'<div class="empty">Nobody hot right now.</div>');
+  h+=`<h2>📞 Called, waiting for call back <span class="n">${t.waiting.length}</span></h2>`+(t.waiting.length?t.waiting.map(c=>card(c,'follow up '+(c.follow_up||'not set')+((c.follow_up&&c.follow_up<=new Date().toISOString().slice(0,10))?' · due now':''))).join(''):'<div class="empty">Nobody waiting. Use "Called, waiting" after a call where they said they would call back.</div>');
   h+=`<h2>👀 Viewed their check-up <span class="n">${t.viewed.length}</span></h2>`+(t.viewed.length?t.viewed.map(c=>card(c,'viewed '+ago(evl(c,'pack_view')))).join(''):'<div class="empty">No page views in the last 7 days.</div>');
   if(t.opened.length)h+=`<h2>📬 Opened 2+ times (recent) <span class="n">${t.opened.length}</span></h2><div class="sm" style="margin:-4px 0 8px">Opens are a soft signal: some inboxes pre-load email.</div>`+t.opened.map(c=>card(c,evn(c,'email_open')+' opens')).join('');
   if(t.due.length)h+=`<h2>⏰ Follow-ups due <span class="n">${t.due.length}</span></h2>`+t.due.map(c=>card(c,'due '+c.follow_up)).join('');
@@ -251,7 +254,7 @@ ${finds.length?`<div class="sm" style="margin-top:6px">What we found:</div><ul c
 <div class="sm" style="margin-top:6px">Offers:</div><ul class="cs-l"><li>Free preview of a fixed homepage, built in about a day.</li><li>Voice assistant that answers missed calls: they can try it at <b>(469) 779-9037</b>.</li><li>Priced on what their business actually needs.</li></ul>
 ${x1.contact_note?`<div class="sm" style="margin-top:6px">On file: ${esc(x1.contact_note)}</div>`:''}</div>
 <p class="sm" style="margin:14px 0 6px"><b>After the call</b></p>
-<div class="cs-out"><button class="btn" data-o="noans">No answer</button><button class="btn" data-o="vm">Left voicemail</button><button class="btn go" data-o="int">Interested</button><button class="btn" data-o="meet">Meeting set</button><button class="btn" data-o="no">Not interested</button><button class="btn" data-o="won">Won</button></div>
+<div class="cs-out"><button class="btn" data-o="noans">No answer</button><button class="btn" data-o="vm">Left voicemail</button><button class="btn" data-o="wait">Waiting for call back</button><button class="btn go" data-o="int">Interested</button><button class="btn" data-o="meet">Meeting set</button><button class="btn" data-o="no">Not interested</button><button class="btn" data-o="won">Won</button></div>
 <div class="row" style="margin-top:8px"><span class="sm">Call back on</span><input type="date" id="dcb" value="${esc(c.follow_up||'')}" style="padding:7px;border:1px solid var(--line);border-radius:9px"><button class="btn" id="dcbs">Set</button></div>
 <p class="sm" style="margin:14px 0 4px">Notes (saves when you click away)</p><textarea id="dn" style="min-height:110px">${esc(notes)}</textarea>
 <div class="row" style="margin-top:6px"><input id="dq" placeholder="Quick note, e.g. owner is Mike, call after 3pm" style="flex:1;min-width:180px;padding:8px;border:1px solid var(--line);border-radius:9px"><button class="btn" id="dqa">Add note</button></div>
@@ -268,6 +271,7 @@ ${first?`<details style="margin-top:12px"><summary>The email we sent (${esc(firs
   const stopF=()=>sb.from('outreach').update({status:'cancelled'}).eq('company_key',key).eq('auto',true).eq('status','scheduled');
   dr.querySelectorAll('[data-o]').forEach(b=>b.onclick=async()=>{const k=b.dataset.o;
     if(k==='noans')return upd({notes:addNote('Called, no answer'),follow_up:addDays(1)},'Logged. Call-back set for tomorrow');
+    if(k==='wait')return upd({notes:addNote('Called, they said they will call back'),status:'called',follow_up:addDays(1)},'Logged. Waiting for call back, follow-up set for tomorrow');
     if(k==='vm')return upd({notes:addNote('Left voicemail'),follow_up:addDays(2)},'Logged. Call-back set in 2 days');
     if(k==='int'){await stopF();return upd({notes:addNote('Talked, interested'),status:'replied',follow_up:addDays(1)},'Logged as interested')}
     if(k==='meet'){await stopF();return upd({notes:addNote('Meeting set'),status:'meeting'},'Meeting set')}
