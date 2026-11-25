@@ -222,6 +222,28 @@ section.contact{padding:86px 0}
  .xcopy .btn{padding:14px 20px}
 }
 @media(prefers-reduced-motion:reduce){.art *{animation:none!important}}
+
+section.jobs{position:relative;height:340svh;background:#0e1b3d;color:#fff}
+.jstage{position:sticky;top:0;height:100svh;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#1f3f8f,#0e1b3d 70%)}
+.jbig{position:absolute;left:0;top:50%;white-space:nowrap;font:900 clamp(220px,34vw,520px)/.8 var(--d);color:transparent;-webkit-text-stroke:2px rgba(255,255,255,.2);transform:translateY(-50%);will-change:transform;pointer-events:none}
+.jhead{position:absolute;left:max(24px,5vw);top:86px;z-index:4;pointer-events:none;text-shadow:0 2px 20px rgba(0,0,0,.5)}
+.jhead h2{color:#fff;font-size:clamp(34px,4.6vw,64px)}.jhead h2 br{display:none}
+.jhead p{display:none}
+.jtrack{position:absolute;left:0;top:172px;bottom:64px;display:flex;align-items:center;gap:clamp(24px,5vw,80px);padding:0 calc(50vw - 150px);will-change:transform}
+.jc{margin:0;flex:0 0 auto;height:100%;max-height:620px;aspect-ratio:3/4;border-radius:20px;overflow:hidden;position:relative;cursor:zoom-in;background:#000;box-shadow:0 40px 80px rgba(0,0,0,.6),0 0 0 4px rgba(255,255,255,.1);will-change:transform,filter}
+.jc img{position:absolute;inset:-6% -14%;width:128%;height:112%;max-width:none;object-fit:cover;will-change:transform}
+.jc figcaption{position:absolute;left:0;right:0;bottom:0;padding:70px 18px 18px;font:700 17px var(--b);background:linear-gradient(transparent,rgba(0,0,0,.85));display:flex;gap:12px;align-items:baseline}
+.jc figcaption b{font:900 40px/1 var(--d);color:#ff6b78}
+.jbar{position:absolute;left:max(24px,5vw);right:max(24px,5vw);bottom:34px;height:4px;border-radius:4px;background:rgba(255,255,255,.18);z-index:4}
+.jbar i{display:block;height:100%;width:0;background:var(--red);border-radius:4px}
+@media(max-width:860px){.jhead h2{font-size:clamp(34px,10vw,48px)}.jhead h2 br{display:block}.jtrack{top:176px;bottom:calc(112px + env(safe-area-inset-bottom));padding:0 calc(50vw - 100px)}.jhead{top:78px}.jbar{bottom:calc(96px + env(safe-area-inset-bottom))}section.jobs{height:300svh}}
+
+.tflash{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 50% 62%,rgba(255,236,190,.85),rgba(255,190,90,.25) 38%,transparent 70%);mix-blend-mode:screen}
+.tstage.wide .tcv{left:0;right:0;top:0;transform-origin:50% 60%;height:100%;width:100%;aspect-ratio:auto;border-radius:0;box-shadow:none}
+.tstage.wide .tshade{background:linear-gradient(90deg,rgba(14,27,61,.82),rgba(14,27,61,.15) 58%,transparent),linear-gradient(transparent 60%,rgba(14,27,61,.55))}
+.tstage.wide .tback{display:none}
+.tstage.wide .tl{text-shadow:0 4px 40px rgba(0,0,0,.6)}
+@media(max-width:860px){.tstage.wide .tshade{background:linear-gradient(rgba(14,27,61,0) 40%,rgba(14,27,61,.88))}}
 </style></head><body class="nojs">
 <header class="top"><a href="#top" aria-label="KC Duran Garage Doors"><svg viewBox="0 0 80 64" width="92" height="92" aria-hidden="true"><g fill="#d62839"><rect x="0" y="22" width="16" height="4"/><rect x="0" y="31" width="16" height="4"/><rect x="0" y="40" width="16" height="4"/><rect x="64" y="22" width="16" height="4"/><rect x="64" y="31" width="16" height="4"/><rect x="64" y="40" width="16" height="4"/></g><path d="M14 6h52v30c0 13-12 21-26 26C26 57 14 49 14 36z" fill="#1f3f8f"/><path d="M18 18h44v18c0 10-10 17-22 21-12-4-22-11-22-21z" fill="#fff"/><g fill="#fff"><circle cx="24" cy="12" r="2"/><circle cx="32" cy="12" r="2"/><circle cx="40" cy="12" r="2"/><circle cx="48" cy="12" r="2"/><circle cx="56" cy="12" r="2"/></g><text x="40" y="35" text-anchor="middle" font-family="Big Shoulders Display,Impact,sans-serif" font-size="15" font-weight="900" fill="#1f3f8f">KC DURAN</text><text x="40" y="46" text-anchor="middle" font-family="Big Shoulders Display,Impact,sans-serif" font-size="8.5" font-weight="800" fill="#d62839" letter-spacing=".5">GARAGE DOORS</text></svg></a><a class="btn red" href="tel:+14809964020">Call (480) 996-4020</a></header>
 
@@ -267,7 +289,7 @@ section.contact{padding:86px 0}
  <div class="tstage">
   <div class="tback"></div>
   <canvas class="tcv" id="tcv" width="540" height="960" aria-hidden="true"></canvas>
-  <div class="tshade"></div>
+  <div class="tshade"></div><div class="tflash" id="tflash"></div>
   <div class="tcopy">
    <p class="tl" data-s=".04" data-e=".36">Meet the truck.</p>
    <p class="tl" data-s=".34" data-e=".68">Mesa, Arizona.</p>
@@ -276,14 +298,16 @@ section.contact{padding:86px 0}
  </div>
 </section>
 
-<section class="work" id="work"><div class="w">
- <h2 class="rv">Real jobs around Mesa.</h2>
- <p class="lead rv">Photos from Kyler’s own projects. Swipe or drag, tap to enlarge.</p>
-</div>
- <div class="rail2 rv" id="gal">
-  <figure><img loading="lazy" src="img/p3.jpg" alt="A new black steel gate with wood-look slats" width="600" height="800"><figcaption>New gate, black steel frame</figcaption></figure>
-  <figure><img loading="lazy" src="img/p4.jpg" alt="A finished gate set in a block wall" width="600" height="800"><figcaption>Finished gate in a block wall</figcaption></figure>
-  <figure><img loading="lazy" src="img/p2.jpg" alt="Close-up of an older wooden gate and its latch" width="600" height="800"><figcaption>Gate repair, close-up</figcaption></figure>
+<section class="jobs" id="work" aria-label="Recent jobs">
+ <div class="jstage">
+  <div class="jbig" id="jbig" aria-hidden="true">REAL JOBS</div>
+  <div class="jhead"><h2>Real jobs <br>around Mesa.</h2><p>Photos from Kyler’s own projects. Tap one to blow it up.</p></div>
+  <div class="jtrack" id="jt">
+   <figure class="jc"><img src="img/p3.jpg" alt="A new black steel gate with wood-look slats" width="600" height="800"><figcaption><b>01</b>New gate, black steel frame</figcaption></figure>
+   <figure class="jc"><img src="img/p4.jpg" alt="A finished gate set in a block wall" width="600" height="800"><figcaption><b>02</b>Finished gate in a block wall</figcaption></figure>
+   <figure class="jc"><img src="img/p2.jpg" alt="Close-up of an older wooden gate and its latch" width="600" height="800"><figcaption><b>03</b>Gate repair, close-up</figcaption></figure>
+  </div>
+  <div class="jbar" aria-hidden="true"><i id="jfill"></i></div>
  </div>
 </section>
 
@@ -369,7 +393,7 @@ var io=new IntersectionObserver(function(en){en.forEach(function(e){if(e.isInter
 $$('.rv').forEach(function(el){io.observe(el)});
 var co=new IntersectionObserver(function(en){en.forEach(function(e){if(!e.isIntersecting)return;co.unobserve(e.target);var b=e.target,n=+b.dataset.n,t0=performance.now();if(rm)return;(function f(t){var p=Math.min(1,(t-t0)/1100);b.textContent=Math.round(n*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)})(t0)})},{threshold:.6});
 $$('[data-n]').forEach(function(b){co.observe(b)});
-var lb=$('#lb');$('#gal').addEventListener('click',function(e){var f=e.target.closest('figure');if(!f)return;$('img',lb).src=$('img',f).src;$('img',lb).alt=$('img',f).alt;lb.classList.add('on')});lb.addEventListener('click',function(){lb.classList.remove('on')});document.addEventListener('keydown',function(e){if(e.key==='Escape')lb.classList.remove('on')});
+var lb=$('#lb');$('#jt').addEventListener('click',function(e){var f=e.target.closest('figure');if(!f)return;$('img',lb).src=$('img',f).src;$('img',lb).alt=$('img',f).alt;lb.classList.add('on')});lb.addEventListener('click',function(){lb.classList.remove('on')});document.addEventListener('keydown',function(e){if(e.key==='Escape')lb.classList.remove('on')});
 var qs=$('#qs'),qd=$('#qd'),qn=$$('.q',qs).length,qi=0;qd.innerHTML=new Array(qn+1).join('<i></i>');
 function qset(i){qi=i;$$('i',qd).forEach(function(d,j){d.classList.toggle('on',j===i)})}qset(0);
 qs.addEventListener('scroll',function(){var i=Math.round(qs.scrollLeft/qs.clientWidth);if(i!==qi)qset(i)},{passive:true});
@@ -384,8 +408,8 @@ function pick(a,i){for(var k=i;k>=0;k--){var im=a[k];if(im&&im.complete&&im.natu
 function cover(cx,cv,im){var cw=cv.width,ch=cv.height,r=Math.max(cw/im.naturalWidth,ch/im.naturalHeight),w=im.naturalWidth*r,h=im.naturalHeight*r;cx.drawImage(im,(cw-w)/2,(ch-h)/2,w,h)}
 var N=95,TN=79,fr=null,tr=null,tick=false;
 var op=$('.opener'),cv=$('#cv'),cx=cv.getContext('2d'),hint=$('#hint'),hero=$('#heroIn'),shade=$('#shade'),mbar=$('#mbar'),ob=$('#openBtn'),words=$$('.hi .wd,.hi .hs');
-var tsec=$('#truck'),tcv=$('#tcv'),tcx=tcv.getContext('2d'),tls=$$('.tl'),xsec=$('#exit'),xcv=$('#xcv'),xcx=xcv.getContext('2d'),xshade=$('#xshade'),xcopy=$('#xcopy');
-var cur=-1,tcur=-1,xcur=-1;
+var tstage=$('.tstage'),tflash=$('#tflash'),tsec=$('#truck'),tcv=$('#tcv'),tcx=tcv.getContext('2d'),tls=$$('.tl'),xsec=$('#exit'),xcv=$('#xcv'),xcx=xcv.getContext('2d'),xshade=$('#xshade'),xcopy=$('#xcopy');
+var jsec=$('#work'),jtrack=$('#jt'),jbig=$('#jbig'),jfill=$('#jfill'),jcs=$$('.jc'),cur=-1,tcur=-1,xcur=-1;
 function fit(){var d=Math.min(devicePixelRatio||1,2);cv.width=innerWidth*d;cv.height=innerHeight*d;xcv.width=innerWidth*d;xcv.height=innerHeight*d;cur=-1;xcur=-1;req()}
 fr=loadSeq('fr/',N);
 var tloaded=false;function needTruck(){if(!tloaded){tloaded=true;tr=loadSeq('tr/',TN)}}
@@ -398,8 +422,12 @@ function frame(){tick=false;
  var m=words.length;words.forEach(function(w,i){var t=ease(cl(hp*1.7-i*(.8/m)));w.style.opacity=t;w.style.transform='translateY('+((1-t)*28)+'px)'});
  hint.style.opacity=p<.04?'1':'0';ob.style.opacity=p<.9?'1':'0';ob.style.pointerEvents=p<.9?'auto':'none';
  var t=prog(tsec),tp=t.p;
- if(tr&&t.r.top<innerHeight*2&&t.r.bottom>-innerHeight){var ti=Math.min(TN-1,Math.round(tp*(TN-1)));if(ti!==tcur){var tm=pick(tr,ti);if(tm){tcur=ti;if(tcv.width!==tm.naturalWidth){tcv.width=tm.naturalWidth;tcv.height=tm.naturalHeight}tcx.drawImage(tm,0,0)}}}
+ if(tr&&t.r.top<innerHeight*2&&t.r.bottom>-innerHeight){var ti=Math.min(TN-1,Math.round(tp*(TN-1)));if(ti!==tcur){var tm=pick(tr,ti);if(tm){tcur=ti;if(tcv.width!==tm.naturalWidth){tcv.width=tm.naturalWidth;tcv.height=tm.naturalHeight;tstage.classList.toggle('wide',tm.naturalWidth>tm.naturalHeight)}tcx.drawImage(tm,0,0)}}}
+ if(tstage.classList.contains('wide')&&!rm){tcv.style.transform='scale('+(1+tp*.14)+')'}var fl=Math.max(0,1-Math.abs(tp-.55)/.1);tflash.style.opacity=rm?0:fl*.9;
  tls.forEach(function(el){var s=+el.dataset.s,e=+el.dataset.e,a=cl((tp-s)/.07),b=el.classList.contains('tlast')?1:1-cl((tp-(e-.07))/.07),v=Math.min(a,b);el.style.opacity=v;el.style.transform='translateY('+((1-a)*40+(1-b)*-30)+'px)';el.style.pointerEvents=v>.6?'auto':'none'});
+ var j=prog(jsec),jp=j.p;
+ if(j.r.top<innerHeight&&j.r.bottom>0){var tw=jtrack.scrollWidth-innerWidth,jx=-jp*tw;jtrack.style.transform='translate3d('+jx+'px,0,0)';jbig.style.transform='translate3d('+(jp*-(jbig.scrollWidth-innerWidth*.4))+'px,-50%,0)';jfill.style.width=(jp*100)+'%';
+  jcs.forEach(function(c){var r=c.getBoundingClientRect(),d=((r.left+r.width/2)-innerWidth/2)/innerWidth,ad=Math.min(1,Math.abs(d));c.style.transform='rotate('+(d*7)+'deg) scale('+(1.07-ad*.2)+')';c.style.filter='brightness('+(1-ad*.55)+')';c.firstElementChild.style.transform='translateX('+(-d*60)+'px)'})}
  var x=prog(xsec),xp=x.p;
  if(x.r.top<innerHeight*2&&x.r.bottom>-innerHeight){var xf=Math.max(0,Math.min(N-1,Math.round((1-ease(cl(xp/.7)))*(N-1))));if(xf!==xcur){var xm=pick(fr,xf);if(xm){xcur=xf;cover(xcx,xcv,xm)}}}
  var xa=ease(cl((xp-.55)/.3));xshade.style.opacity=xa;xcopy.style.opacity=xa;xcopy.style.pointerEvents=xa>.6?'auto':'none';xcopy.style.transform='translateY('+((1-xa)*30)+'px)';
