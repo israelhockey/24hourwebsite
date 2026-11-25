@@ -225,7 +225,7 @@ async function openDrawer(key,keep){
     sb.from('events').select('type,created_at,meta').eq('company_key',key).neq('type','email_delivered').order('created_at',{ascending:false}).limit(60),
     sb.from('outreach').select('id,step,status,subject,sent_at,send_after,variant,subject_style,body,to_address').eq('company_key',key).order('id',{ascending:true}),
     sb.from('findings').select('title,detail').eq('company_key',key).limit(8),
-    sb.from('companies').select('website,contact_note,notes,email,phone').eq('key',key).maybeSingle()]);
+    sb.from('companies').select('website,contact_note,notes,email,phone,call_sheet_url').eq('key',key).maybeSingle()]);
   if(drawerKey!==key)return;
   const x1=x.data||{},site=url(x1.website),notes=x1.notes||c.notes||'',phone=x1.phone||c.phone,email=x1.email||c.email;
   const tel=phone?phone.replace(/[^\d+]/g,''):'';
@@ -240,6 +240,7 @@ async function openDrawer(key,keep){
 <div class="cs-act">${tel?`<a class="btn go big" href="tel:${esc(tel)}">📞 Call ${esc(phone)}</a>`:'<span class="sm">No phone number on file</span>'}
 ${tel?`<a class="btn" href="sms:${esc(tel)}">💬 Text</a>`:''}
 ${site?`<a class="btn p" target="_blank" rel="noopener" href="${esc(site)}">🌐 Their website</a>`:'<span class="btn" style="opacity:.6">No website on Google listing</span>'}
+${x1.call_sheet_url?`<a class="btn p" target="_blank" rel="noopener" href="${esc(x1.call_sheet_url)}">📋 Full call sheet</a>`:''}
 ${c.pack_url?`<a class="btn" target="_blank" rel="noopener" href="${esc(c.pack_url)}?from=floor">📄 Their check-up page</a>`:''}
 <a class="btn" target="_blank" rel="noopener" href="${esc(maps)}">📍 Google listing</a>
 ${email?`<a class="btn" href="mailto:${esc(email)}">✉️ ${esc(email)}</a>`:''}</div>
