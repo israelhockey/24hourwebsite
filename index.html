@@ -77,14 +77,14 @@ function shell(){
 }
 function nav(){
   const t=todayLists();const n=t.hot.length+t.waiting.length+t.viewed.length+t.drafts.length+t.due.length+t.failed.length;
-  const T=[['today','Today',n],['pipeline','Pipeline'],['results','Results'],['voice','Voice'],['runs','Runs']];
+  const T=[['today','Today',n],['pipeline','Pipeline'],['fbads','FB ads',D.companies.filter(c=>c.tier==='fb_ad').length],['results','Results'],['voice','Voice'],['runs','Runs']];
   $('nav').innerHTML=T.map(x=>`<button data-t="${x[0]}" aria-selected="${tab===x[0]}">${x[1]}${x[2]?`<b>${x[2]}</b>`:''}</button>`).join('');
   $('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
   $('upd').textContent=loadedAt?'Updated '+ago(loadedAt):'';
 }
 function render(){
   if(!D)return;nav();const m=$('main');
-  ({today:vToday,pipeline:vPipeline,results:vResults,voice:vVoice,runs:vRuns}[tab])(m);
+  ({today:vToday,pipeline:vPipeline,fbads:vFb,results:vResults,voice:vVoice,runs:vRuns}[tab])(m);
   if(drawerKey)openDrawer(drawerKey,true);
 }
 const byKey=k=>D.companies.find(c=>c.key===k);
@@ -107,6 +107,12 @@ ${c.phone?`<a class="btn go" href="tel:${esc(c.phone.replace(/[^\d+]/g,''))}">Ca
 function wire(m){
   m.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openDrawer(b.dataset.open));
   m.querySelectorAll('[data-called]').forEach(b=>b.onclick=async()=>{const r=await sb.from('companies').update({status:'called',updated_at:new Date().toISOString(),updated_by_name:me}).eq('key',b.dataset.called);if(r.error)return toast(r.error.message);toast('Marked called');load()});
+}
+function vFb(m){
+  const L=D.companies.filter(c=>c.tier==='fb_ad').sort((a,b)=>ms(b.created)-ms(a.created));
+  let h=`<h2>📣 Facebook ad outreach <span class="n">${L.length}</span></h2><div class="sm" style="margin:-4px 0 10px">Businesses we found running weak ads on the Facebook Ad Library. We remake their ad (image + video) and email them the pack.</div>`;
+  h+=L.length?L.map(c=>`<div class="card"><div class="row"><div class="grow"><div class="nm">${esc(c.name)} ${pill(c)}</div><div class="sm">${esc(c.city||'')} · ${esc(c.industry||'')}${c.sent>0||c.status==='sent'?' · emailed':''}${c.follow_up?' · follow up '+esc(c.follow_up):''}</div></div>${c.pack_url?`<a class="btn p" target="_blank" rel="noopener" href="${esc(c.pack_url)}">Ad pack</a>`:''}${c.phone?`<a class="btn go" href="tel:${esc(c.phone.replace(/[^\d+]/g,''))}">Call ${esc(c.phone)}</a>`:''}<button class="btn" data-open="${esc(c.key)}">Details</button></div></div>`).join(''):'<div class="empty">No ad outreach yet.</div>';
+  m.innerHTML=h;wire(m);
 }
 function vToday(m){
   const t=todayLists(),C=D.companies,sent=C.filter(c=>c.sent>0).length;
